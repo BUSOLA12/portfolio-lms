@@ -1,0 +1,278 @@
+/* ============================================================
+   Design tokens — v1.2
+   Portfolio + LMS. Deep green + ochre. Single source of truth.
+   Layer 1 = primitives (raw values, never used directly in UI)
+   Layer 2 = semantic (what the UI actually references)
+
+   "Primitive" means a raw token value, and nothing else. The
+   shared component layer — Button, Input, Card, Badge, Rail —
+   is called ELEMENTS, so the two never collide in conversation
+   or in a folder name.
+
+   v1.2 — added --state-overdue-rail in both themes. tokens.json
+   has declared it since 1.1.0; this file had not. Overdue knots
+   on the payment rail had no legal token until now.
+   ============================================================ */
+
+:root {
+  /* ---------- 1. PRIMITIVES: colour ---------- */
+
+  /* Green — the base. Deep and forest-toned, not eco-bright. */
+  --green-950: #061710;
+  --green-900: #0B2418;
+  --green-800: #113322;
+  --green-700: #17492F;
+  --green-600: #1D6140;
+  --green-500: #268054;
+  --green-400: #4FA37A;
+  --green-300: #86C4A4;
+  --green-200: #BCDECC;
+  --green-100: #DDEFE5;
+  --green-050: #F0F8F3;
+
+  /* Ochre — accent. Used sparingly: one per screen region. */
+  --ochre-700: #94631A;
+  --ochre-600: #B87F24;
+  --ochre-500: #E0A33E;
+  --ochre-400: #EDBB68;
+  --ochre-200: #F8DFB2;
+  --ochre-100: #FCF1DC;
+
+  /* Neutrals — warmed slightly off blue so they sit under green, not fight it */
+  --paper:     #F8F9F6;
+  --paper-alt: #EDF0EA;
+  --line:      #DFE4DC;
+  --line-soft: #EBEFE7;
+  --slate-700: #414A44;
+  --slate-500: #6A7570;
+  --slate-400: #8E9791;
+  --white:     #FFFFFF;
+
+  /* Status — kola green, clay red.
+     success/successSoft are aliases of green-600/green-100 by design:
+     in this system green means progress everywhere. Alias, don't redeclare. */
+  --success:      var(--green-600);
+  --success-soft: var(--green-100);
+  --red-600:   #B3402F;
+  --red-100:   #FBE4E0;
+
+  /* ---------- 1. PRIMITIVES: type ---------- */
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --font-body:    "Public Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "Courier New", monospace;
+
+  /* Type scale — 1.25 major third, capped for mobile legibility */
+  --size-2xs: 0.694rem;   /* 11px  */
+  --size-xs:  0.79rem;    /* 12.6  */
+  --size-sm:  0.889rem;   /* 14.2  */
+  --size-md:  1rem;       /* 16    */
+  --size-lg:  1.125rem;   /* 18    */
+  --size-xl:  1.424rem;   /* 22.8  */
+  --size-2xl: 1.802rem;   /* 28.8  */
+  --size-3xl: 2.281rem;   /* 36.5  */
+  --size-4xl: 2.887rem;   /* 46.2  */
+  --size-5xl: clamp(2.887rem, 1.8rem + 4.2vw, 4.624rem);
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semi:    600;
+  --weight-bold:    700;
+  --weight-display: 800;
+
+  --leading-tight:   1.08;
+  --leading-snug:    1.25;
+  --leading-normal:  1.55;
+  --leading-relaxed: 1.7;
+
+  --tracking-tight: -0.022em;
+  --tracking-normal: 0;
+  --tracking-wide:  0.08em;
+
+  /* ---------- 1. PRIMITIVES: space ---------- */
+  /* 4px base. Named by step, not by t-shirt size, so it survives scaling. */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.5rem;
+  --space-6:  2rem;
+  --space-7:  2.5rem;
+  --space-8:  3rem;
+  --space-9:  4rem;
+  --space-10: 5rem;
+  --space-11: 7rem;
+
+  /* ---------- 1. PRIMITIVES: shape ---------- */
+  --radius-xs:   3px;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-full: 999px;
+
+  --border-hair: 1px;
+  --border-firm: 2px;
+
+  /* Shadows are green-tinted, never neutral grey */
+  --shadow-sm: 0 1px 2px rgba(6, 23, 16, 0.06);
+  --shadow-md: 0 4px 12px rgba(6, 23, 16, 0.08);
+  --shadow-lg: 0 14px 34px rgba(6, 23, 16, 0.12);
+  --shadow-focus: 0 0 0 3px var(--ochre-200);
+
+  /* ---------- 1. PRIMITIVES: motion ---------- */
+  --ease-out:   cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:   140ms;
+  --dur-base:   240ms;
+  --dur-slow:   420ms;
+
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-overlay: 500;
+  --z-modal: 900;
+  --z-toast: 1000;
+
+  --container: 1180px;
+  --measure: 68ch;
+
+  /* ============================================================
+     2. SEMANTIC — reference these in components, not the above
+     ============================================================ */
+
+  /* Surfaces */
+  --bg-page:      var(--paper);
+  --bg-surface:   var(--white);
+  --bg-sunken:    var(--paper-alt);
+  --bg-inverse:   var(--green-900);
+  --bg-brand:     var(--green-600);
+  --bg-brand-soft:var(--green-050);
+  --bg-accent:    var(--ochre-500);
+  --bg-accent-soft: var(--ochre-100);
+
+  /* Text */
+  --text-primary:   var(--green-950);
+  --text-secondary: var(--slate-700);
+  --text-muted:     var(--slate-500);
+  --text-on-brand:  var(--white);
+  --text-on-accent: var(--green-950);
+  --text-link:      var(--green-600);
+
+  /* Borders */
+  --border-default: var(--line);
+  --border-subtle:  var(--line-soft);
+  --border-strong:  var(--green-200);
+  --border-focus:   var(--ochre-500);
+
+  /* Interactive */
+  --action-primary-bg:       var(--green-600);
+  --action-primary-bg-hover: var(--green-700);
+  --action-primary-text:     var(--white);
+  --action-accent-bg:        var(--ochre-500);
+  --action-accent-bg-hover:  var(--ochre-600);
+  --action-accent-text:      var(--green-950);
+  --action-quiet-text:       var(--green-600);
+  --action-quiet-bg-hover:   var(--green-050);
+
+  /* LMS state — the vocabulary the whole platform learns */
+  --state-locked-bg:    var(--paper-alt);
+  --state-locked-text:  var(--slate-400);
+  --state-active-bg:    var(--ochre-100);
+  --state-active-text:  var(--ochre-700);
+  --state-active-rail:  var(--ochre-500);
+  --state-done-bg:      var(--green-100);
+  --state-done-text:    var(--green-600);
+  --state-done-rail:    var(--green-600);
+  --state-overdue-bg:   var(--red-100);
+  --state-overdue-text: var(--red-600);
+  --state-overdue-rail: var(--red-600);
+
+  /* Portfolio-specific */
+  --tag-bg:   var(--green-050);
+  --tag-text: var(--green-700);
+  --code-bg:  var(--green-950);
+  --code-text:var(--green-100);
+}
+
+/* ---------- Dark mode: LMS study sessions run late ---------- */
+[data-theme="dark"] {
+  --bg-page:      var(--green-950);
+  --bg-surface:   var(--green-900);
+  --bg-sunken:    #0A2015;
+  --bg-inverse:   var(--white);
+  --bg-brand-soft:var(--green-800);
+
+  --text-primary:   #EDF3EE;
+  --text-secondary: var(--green-200);
+  --text-muted:     var(--green-300);
+  --text-link:      var(--green-300);
+
+  --border-default: #1E3A29;
+  --border-subtle:  #163020;
+  --border-strong:  var(--green-700);
+
+  --action-primary-bg:       var(--green-500);
+  --action-primary-bg-hover: var(--green-400);
+  --action-quiet-text:       var(--green-300);
+  --action-quiet-bg-hover:   var(--green-800);
+
+  --state-locked-bg:   #12291B;
+  --state-locked-text: var(--slate-400);
+  --state-active-bg:   #3A2C12;
+  --state-active-text: var(--ochre-400);
+  --state-active-rail: var(--ochre-400);
+  --state-done-bg:     #0F2D1E;
+  --state-done-text:   #6FCBA0;
+  --state-done-rail:   #6FCBA0;
+  --state-overdue-bg:   #3A1712;
+  --state-overdue-text: #E88A78;
+  --state-overdue-rail: #E88A78;
+
+  --tag-bg:   var(--green-800);
+  --tag-text: var(--green-200);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 14px 34px rgba(0, 0, 0, 0.55);
+}
+
+/* ---------- Quality floor ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: var(--border-firm) solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Fonts: self-hosted, Latin subset, swap ----------
+   Three families over metered mobile data is a real payload.
+   Self-host, subset, and let text render immediately.
+   Replace the paths below with your own /fonts directory. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+  font-weight: 400 800;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+20A6, U+2122;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+20A6, U+2122;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2000-206F, U+20A6;
+}

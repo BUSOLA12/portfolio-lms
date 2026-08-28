@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Green &amp; Ochre — Design System</title>
+<!-- Self-hosted, Latin-subset, U+20A6 included. The CDN is not used:
+     the shipped product self-hosts, and this page must match it. -->
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url("/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+font-weight:400 800;font-display:swap;
+unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+2000-206F,U+20A6,U+2122;}
+@font-face{font-family:"Public Sans";src:url("/fonts/public-sans-latin.woff2") format("woff2");
+font-weight:400 700;font-display:swap;
+unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+2000-206F,U+20A6,U+2122;}
+@font-face{font-family:"JetBrains Mono";src:url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+font-weight:400 600;font-display:swap;
+unicode-range:U+0000-00FF,U+2000-206F,U+20A6;}
+</style>
+<style>
+:root{
+--green-950:#061710;--green-900:#0B2418;--green-800:#113322;--green-700:#17492F;
+--green-600:#1D6140;--green-500:#268054;--green-400:#4FA37A;--green-300:#86C4A4;
+--green-200:#BCDECC;--green-100:#DDEFE5;--green-050:#F0F8F3;
+--ochre-700:#94631A;--ochre-600:#B87F24;--ochre-500:#E0A33E;--ochre-400:#EDBB68;
+--ochre-200:#F8DFB2;--ochre-100:#FCF1DC;
+--paper:#F8F9F6;--paper-alt:#EDF0EA;--line:#DFE4DC;--line-soft:#EBEFE7;
+--slate-700:#414A44;--slate-500:#6A7570;--slate-400:#8E9791;--white:#fff;
+--success:var(--green-600);--success-soft:var(--green-100);--red-600:#B3402F;--red-100:#FBE4E0;
+
+--font-display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+--font-body:"Public Sans",system-ui,sans-serif;
+--font-mono:"JetBrains Mono",ui-monospace,monospace;
+
+--size-2xs:.694rem;--size-xs:.79rem;--size-sm:.889rem;--size-md:1rem;--size-lg:1.125rem;
+--size-xl:1.424rem;--size-2xl:1.802rem;--size-3xl:2.281rem;--size-4xl:2.887rem;
+--size-5xl:clamp(2.887rem,1.8rem + 4.2vw,4.624rem);
+
+--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.5rem;
+--space-6:2rem;--space-7:2.5rem;--space-8:3rem;--space-9:4rem;--space-10:5rem;--space-11:7rem;
+
+--radius-xs:3px;--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--radius-xl:24px;--radius-full:999px;
+--shadow-sm:0 1px 2px rgba(6,23,16,.06);--shadow-md:0 4px 12px rgba(6,23,16,.08);
+--shadow-lg:0 14px 34px rgba(6,23,16,.12);
+--ease-out:cubic-bezier(.22,.61,.36,1);--dur-fast:140ms;--dur-base:240ms;
+--container:1180px;
+
+--bg-page:var(--paper);--bg-surface:var(--white);--bg-sunken:var(--paper-alt);
+--bg-inverse:var(--green-900);--bg-brand:var(--green-600);--bg-brand-soft:var(--green-050);
+--bg-accent:var(--ochre-500);--bg-accent-soft:var(--ochre-100);
+--text-primary:var(--green-950);--text-secondary:var(--slate-700);--text-muted:var(--slate-500);
+--text-on-brand:var(--white);--text-on-accent:var(--green-950);--text-link:var(--green-600);
+--border-default:var(--line);--border-subtle:var(--line-soft);--border-strong:var(--green-200);
+--border-focus:var(--ochre-500);
+--action-primary-bg:var(--green-600);--action-primary-bg-hover:var(--green-700);
+--action-accent-bg:var(--ochre-500);--action-accent-bg-hover:var(--ochre-600);
+--action-quiet-text:var(--green-600);--action-quiet-bg-hover:var(--green-050);
+--state-locked-bg:var(--paper-alt);--state-locked-text:var(--slate-400);
+--state-active-bg:var(--ochre-100);--state-active-text:var(--ochre-700);--state-active-rail:var(--ochre-500);
+--state-done-bg:var(--success-soft);--state-done-text:var(--success);--state-done-rail:var(--success);
+--state-overdue-bg:var(--red-100);--state-overdue-text:var(--red-600);--state-overdue-rail:var(--red-600);
+--tag-bg:var(--green-050);--tag-text:var(--green-700);
+--code-bg:var(--green-950);--code-text:var(--green-100);
+}
+[data-theme="dark"]{
+--bg-page:var(--green-950);--bg-surface:var(--green-900);--bg-sunken:#0A2015;
+--bg-inverse:var(--white);--bg-brand-soft:var(--green-800);
+--text-primary:#EDF3EE;--text-secondary:var(--green-200);--text-muted:var(--green-300);
+--text-link:var(--green-300);
+--border-default:#1E3A29;--border-subtle:#163020;--border-strong:var(--green-700);
+--action-primary-bg:var(--green-500);--action-primary-bg-hover:var(--green-400);
+--action-quiet-text:var(--green-300);--action-quiet-bg-hover:var(--green-800);
+--state-locked-bg:#12291B;--state-active-bg:#3A2C12;--state-active-text:var(--ochre-400);
+--state-active-rail:var(--ochre-400);
+--state-done-bg:#0F2D1E;--state-done-text:#6FCBA0;--state-done-rail:#6FCBA0;
+--state-overdue-bg:#3A1712;--state-overdue-text:#E88A78;--state-overdue-rail:#E88A78;
+--tag-bg:var(--green-800);--tag-text:var(--green-200);
+--shadow-sm:0 1px 2px rgba(0,0,0,.4);--shadow-md:0 4px 12px rgba(0,0,0,.45);
+--shadow-lg:0 14px 34px rgba(0,0,0,.55);
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:var(--bg-page);color:var(--text-primary);
+font-family:var(--font-body);font-size:var(--size-md);line-height:1.55;
+-webkit-font-smoothing:antialiased;transition:background var(--dur-base) var(--ease-out);}
+:where(a,button,input,[tabindex]):focus-visible{outline:2px solid var(--border-focus);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+
+.wrap{max-width:var(--container);margin:0 auto;padding:0 var(--space-5);}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:800;letter-spacing:-.022em;
+line-height:1.08;margin:0;}
+
+/* ---- masthead ---- */
+.mast{background:var(--bg-inverse);color:#EDF3EE;padding:var(--space-10) 0 var(--space-9);
+position:relative;overflow:hidden;}
+[data-theme="dark"] .mast{color:var(--green-950);}
+.mast::after{content:"";position:absolute;inset:auto 0 0 0;height:6px;
+background:repeating-linear-gradient(90deg,var(--ochre-500) 0 44px,transparent 44px 56px);}
+.eyebrow{font-family:var(--font-mono);font-size:var(--size-2xs);letter-spacing:.08em;
+text-transform:uppercase;color:var(--ochre-400);margin:0 0 var(--space-4);}
+[data-theme="dark"] .eyebrow{color:var(--ochre-600);}
+.mast h1{font-size:var(--size-5xl);max-width:14ch;}
+.mast p{max-width:52ch;color:var(--green-200);margin:var(--space-5) 0 0;font-size:var(--size-lg);}
+[data-theme="dark"] .mast p{color:var(--slate-700);}
+
+.themetoggle{position:absolute;top:var(--space-5);right:var(--space-5);z-index:10;
+background:transparent;border:1px solid currentColor;color:inherit;border-radius:var(--radius-full);
+padding:var(--space-2) var(--space-4);font:500 var(--size-sm)/1 var(--font-body);cursor:pointer;}
+
+/* ---- sections ---- */
+section{padding:var(--space-9) 0;border-bottom:1px solid var(--border-subtle);}
+.sechead{display:flex;align-items:baseline;gap:var(--space-4);margin-bottom:var(--space-6);
+flex-wrap:wrap;}
+.sechead h2{font-size:var(--size-2xl);}
+.sechead .num{font-family:var(--font-mono);font-size:var(--size-sm);color:var(--text-muted);}
+.note{color:var(--text-muted);font-size:var(--size-sm);max-width:62ch;margin:0 0 var(--space-6);}
+
+/* ---- swatches ---- */
+.ramp{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:2px;
+border-radius:var(--radius-md);overflow:hidden;margin-bottom:var(--space-5);}
+.sw{padding:var(--space-6) var(--space-3) var(--space-3);display:flex;flex-direction:column;
+justify-content:flex-end;min-height:104px;}
+.sw b{font:500 var(--size-xs)/1.3 var(--font-mono);}
+.sw span{font:400 var(--size-2xs)/1.4 var(--font-mono);opacity:.72;}
+
+/* ---- type specimens ---- */
+.spec{border-top:1px solid var(--border-subtle);padding:var(--space-5) 0;
+display:grid;grid-template-columns:150px 1fr;gap:var(--space-5);align-items:baseline;}
+.spec .meta{font-family:var(--font-mono);font-size:var(--size-2xs);color:var(--text-muted);
+line-height:1.6;}
+@media(max-width:640px){.spec{grid-template-columns:1fr;gap:var(--space-2);}}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);border:none;cursor:pointer;
+font:600 var(--size-sm)/1 var(--font-body);padding:var(--space-3) var(--space-5);
+border-radius:var(--radius-sm);transition:background var(--dur-fast) var(--ease-out),
+transform var(--dur-fast) var(--ease-out);}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--action-primary-bg);color:#fff;}
+.btn-primary:hover{background:var(--action-primary-bg-hover);}
+.btn-accent{background:var(--action-accent-bg);color:var(--green-950);}
+.btn-accent:hover{background:var(--action-accent-bg-hover);}
+.btn-outline{background:transparent;color:var(--action-quiet-text);
+box-shadow:inset 0 0 0 1px var(--border-strong);}
+.btn-outline:hover{background:var(--action-quiet-bg-hover);}
+.btn-quiet{background:transparent;color:var(--action-quiet-text);padding-inline:var(--space-3);}
+.btn-quiet:hover{background:var(--action-quiet-bg-hover);}
+.btn:disabled{background:var(--bg-sunken);color:var(--slate-400);cursor:not-allowed;}
+.row{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center;}
+
+/* ---- field ---- */
+.field{max-width:360px;}
+.field label{display:block;font-size:var(--size-sm);font-weight:600;margin-bottom:var(--space-2);}
+.field input{width:100%;font:400 var(--size-md)/1.4 var(--font-body);color:var(--text-primary);
+padding:var(--space-3) var(--space-4);background:var(--bg-surface);
+border:1px solid var(--border-default);border-radius:var(--radius-sm);}
+.field input::placeholder{color:var(--slate-400);}
+.field .hint{font-size:var(--size-xs);color:var(--text-muted);margin-top:var(--space-2);}
+
+/* ---- cards ---- */
+.grid{display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fit,minmax(268px,1fr));}
+.card{background:var(--bg-surface);border:1px solid var(--border-subtle);
+border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);
+transition:box-shadow var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out);}
+.card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);}
+.card h3{font-size:var(--size-lg);margin-bottom:var(--space-2);}
+.card p{color:var(--text-secondary);font-size:var(--size-sm);margin:0 0 var(--space-4);}
+.tags{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-4);}
+.tag{background:var(--tag-bg);color:var(--tag-text);font:500 var(--size-2xs)/1 var(--font-mono);
+padding:var(--space-2) var(--space-3);border-radius:var(--radius-xs);letter-spacing:.04em;}
+.cardfoot{display:flex;justify-content:space-between;align-items:center;
+border-top:1px solid var(--border-subtle);padding-top:var(--space-4);
+font-family:var(--font-mono);font-size:var(--size-xs);color:var(--text-muted);}
+
+/* ---- badges ---- */
+.badge{display:inline-flex;align-items:center;gap:var(--space-2);border-radius:var(--radius-full);
+font:600 var(--size-2xs)/1 var(--font-body);padding:var(--space-2) var(--space-3);
+letter-spacing:.02em;}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+.b-locked{background:var(--state-locked-bg);color:var(--state-locked-text);}
+.b-active{background:var(--state-active-bg);color:var(--state-active-text);}
+.b-done{background:var(--state-done-bg);color:var(--state-done-text);}
+.b-overdue{background:var(--state-overdue-bg);color:var(--state-overdue-text);}
+
+/* ---- SIGNATURE: stepped rail ---- */
+.rail{list-style:none;margin:0;padding:0;position:relative;}
+.rail li{position:relative;padding:0 0 var(--space-5) var(--space-7);}
+.rail li::before{content:"";position:absolute;left:9px;top:22px;bottom:-2px;width:2px;
+background:var(--border-default);}
+.rail li:last-child::before{display:none;}
+.rail .knot{position:absolute;left:0;top:3px;width:20px;height:20px;border-radius:var(--radius-xs);
+border:2px solid var(--border-default);background:var(--bg-surface);
+display:grid;place-items:center;font:700 9px/1 var(--font-mono);color:var(--slate-400);
+transform:rotate(45deg);}
+.rail .knot i{transform:rotate(-45deg);font-style:normal;}
+.rail li.done .knot{background:var(--state-done-rail);border-color:var(--state-done-rail);color:#fff;}
+.rail li.done::before{background:var(--state-done-rail);}
+.rail li.active .knot{border-color:var(--state-active-rail);color:var(--state-active-text);
+box-shadow:0 0 0 4px var(--state-active-bg);}
+.rail li.overdue .knot{border-color:var(--state-overdue-rail);color:var(--state-overdue-text);
+box-shadow:0 0 0 4px var(--state-overdue-bg);}
+.rail .t{font-weight:600;font-size:var(--size-sm);display:block;}
+.rail .s{font-family:var(--font-mono);font-size:var(--size-2xs);color:var(--text-muted);}
+
+/* ---- code ---- */
+pre{background:var(--code-bg);color:var(--code-text);border-radius:var(--radius-md);
+padding:var(--space-4);overflow-x:auto;font:400 var(--size-xs)/1.7 var(--font-mono);margin:0;}
+.tok-c{color:var(--ochre-400);}
+.tok-k{color:var(--green-300);}
+
+/* ---- space scale ---- */
+.sp{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-2);}
+.sp .bar{height:16px;background:var(--green-400);border-radius:var(--radius-xs);}
+.sp code{font:400 var(--size-2xs) var(--font-mono);color:var(--text-muted);min-width:120px;}
+
+footer{padding:var(--space-8) 0 var(--space-10);color:var(--text-muted);font-size:var(--size-sm);}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <button class="themetoggle" id="tt">Dark</button>
+  <div class="wrap">
+    <p class="eyebrow">Design system · v1.0</p>
+    <h1>Green &amp; Ochre</h1>
+    <p>One visual language for two jobs: a portfolio that shows the work, and a learning platform where students move through it.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <div class="sechead"><span class="num">01</span><h2>How to use this</h2></div>
+  <p class="note">Two layers. <strong>Primitives</strong> are raw values — <code>--green-600</code>, <code>--space-5</code>. <strong>Semantic tokens</strong> describe a job — <code>--action-primary-bg</code>, <code>--state-done-text</code>. Components reference semantic tokens only. When you rebrand, you edit one layer and everything follows. <strong>"Primitive" means a raw token value and nothing else</strong> — the shared component layer (Button, Input, Card, Badge, Rail) is called <strong>elements</strong>, so the two words never collide.</p>
+  <pre><span class="tok-c">/* Wrong — locks the colour into the component */</span>
+.enroll { background: <span class="tok-k">var(--green-600)</span>; }
+
+<span class="tok-c">/* Right — states the intent */</span>
+.enroll { background: <span class="tok-k">var(--action-primary-bg)</span>; }</pre>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">02</span><h2>Colour</h2></div>
+  <p class="note">Green is the workhorse — navigation, links, primary actions, inverse sections. It is deep and forest-toned rather than eco-bright, which keeps it reading as considered rather than as a sustainability brand. Ochre is rationed: one per screen region, marking the single next thing to do. Green also carries the done state, so green consistently means progress. Red is reserved for overdue, never decoration.</p>
+
+  <div class="ramp">
+    <div class="sw" style="background:#061710;color:#BCDECC"><b>950</b><span>#061710</span></div>
+    <div class="sw" style="background:#0B2418;color:#BCDECC"><b>900</b><span>#0B2418</span></div>
+    <div class="sw" style="background:#113322;color:#BCDECC"><b>800</b><span>#113322</span></div>
+    <div class="sw" style="background:#17492F;color:#DDEFE5"><b>700</b><span>#17492F</span></div>
+    <div class="sw" style="background:#1D6140;color:#fff"><b>600</b><span>#1D6140</span></div>
+    <div class="sw" style="background:#268054;color:#fff"><b>500</b><span>#268054</span></div>
+    <div class="sw" style="background:#4FA37A;color:#061710"><b>400</b><span>#4FA37A</span></div>
+    <div class="sw" style="background:#86C4A4;color:#061710"><b>300</b><span>#86C4A4</span></div>
+    <div class="sw" style="background:#BCDECC;color:#061710"><b>200</b><span>#BCDECC</span></div>
+    <div class="sw" style="background:#DDEFE5;color:#061710"><b>100</b><span>#DDEFE5</span></div>
+    <div class="sw" style="background:#F0F8F3;color:#061710"><b>050</b><span>#F0F8F3</span></div>
+  </div>
+
+  <div class="ramp">
+    <div class="sw" style="background:#94631A;color:#FCF1DC"><b>700</b><span>#94631A</span></div>
+    <div class="sw" style="background:#B87F24;color:#FCF1DC"><b>600</b><span>#B87F24</span></div>
+    <div class="sw" style="background:#E0A33E;color:#061710"><b>500</b><span>#E0A33E</span></div>
+    <div class="sw" style="background:#EDBB68;color:#061710"><b>400</b><span>#EDBB68</span></div>
+    <div class="sw" style="background:#F8DFB2;color:#061710"><b>200</b><span>#F8DFB2</span></div>
+    <div class="sw" style="background:#FCF1DC;color:#061710"><b>100</b><span>#FCF1DC</span></div>
+  </div>
+
+  <div class="ramp">
+    <div class="sw" style="background:#1D6140;color:#fff"><b>done</b><span>= green 600</span></div>
+    <div class="sw" style="background:#DDEFE5;color:#061710"><b>done-bg</b><span>= green 100</span></div>
+    <div class="sw" style="background:#B3402F;color:#fff"><b>overdue</b><span>#B3402F</span></div>
+    <div class="sw" style="background:#FBE4E0;color:#061710"><b>od-bg</b><span>#FBE4E0</span></div>
+    <div class="sw" style="background:#6A7570;color:#fff"><b>muted</b><span>#6A7570</span></div>
+    <div class="sw" style="background:#F8F9F6;color:#061710;box-shadow:inset 0 0 0 1px #DFE4DC"><b>paper</b><span>#F8F9F6</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">03</span><h2>Type</h2></div>
+  <p class="note">Bricolage Grotesque for headings — it has a slightly irregular, cut-by-hand quality that keeps the pages from feeling like a corporate template. Public Sans carries all running text. JetBrains Mono is reserved for things that are literally code or literally a number: class session counts, course codes, durations.</p>
+
+  <div class="spec">
+    <div class="meta">Display / 5xl<br>Bricolage 800<br>tracking −.022em</div>
+    <div style="font-family:var(--font-display);font-weight:800;font-size:var(--size-4xl);line-height:1.08;letter-spacing:-.022em">I build software and teach people to build it</div>
+  </div>
+  <div class="spec">
+    <div class="meta">Heading / 2xl<br>Bricolage 800</div>
+    <div style="font-family:var(--font-display);font-weight:800;font-size:var(--size-2xl);line-height:1.15;letter-spacing:-.022em">Mobile App Development</div>
+  </div>
+  <div class="spec">
+    <div class="meta">Body / md<br>Public Sans 400<br>leading 1.55</div>
+    <div style="max-width:60ch">Eight weeks, three live sessions a week. You write the code while I watch, and you finish with a published app rather than a folder of exercises.</div>
+  </div>
+  <div class="spec">
+    <div class="meta">Small / sm<br>Public Sans 400<br>secondary</div>
+    <div style="color:var(--text-secondary);font-size:var(--size-sm);max-width:60ch">Prerequisites: a laptop, steady internet, and basic familiarity with any programming language.</div>
+  </div>
+  <div class="spec">
+    <div class="meta">Eyebrow / 2xs<br>Mono 400<br>tracking .08em</div>
+    <div style="font-family:var(--font-mono);font-size:var(--size-2xs);letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)">Tranche 02 · 6 class sessions · 2h 40m</div>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">04</span><h2>Space &amp; shape</h2></div>
+  <p class="note">4px base. Steps 1–4 for inside components, 5–7 between components, 8–11 between page sections. Radius climbs with the size of the thing: 6px on buttons and inputs, 16px on cards, full only on badges and avatars.</p>
+  <div class="sp"><code>--space-1 / 4px</code><div class="bar" style="width:4px"></div></div>
+  <div class="sp"><code>--space-2 / 8px</code><div class="bar" style="width:8px"></div></div>
+  <div class="sp"><code>--space-3 / 12px</code><div class="bar" style="width:12px"></div></div>
+  <div class="sp"><code>--space-4 / 16px</code><div class="bar" style="width:16px"></div></div>
+  <div class="sp"><code>--space-5 / 24px</code><div class="bar" style="width:24px"></div></div>
+  <div class="sp"><code>--space-6 / 32px</code><div class="bar" style="width:32px"></div></div>
+  <div class="sp"><code>--space-7 / 40px</code><div class="bar" style="width:40px"></div></div>
+  <div class="sp"><code>--space-8 / 48px</code><div class="bar" style="width:48px"></div></div>
+  <div class="sp"><code>--space-9 / 64px</code><div class="bar" style="width:64px"></div></div>
+  <div class="sp"><code>--space-10 / 80px</code><div class="bar" style="width:80px"></div></div>
+  <div class="sp"><code>--space-11 / 112px</code><div class="bar" style="width:112px"></div></div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">05</span><h2>Actions</h2></div>
+  <p class="note">Green is the default primary. Ochre appears once per region, on the action you actually want taken — enrol, continue, start. If two ochre buttons are visible at once, one of them is wrong.</p>
+  <div class="row" style="margin-bottom:var(--space-5)">
+    <button class="btn btn-accent">Enrol now</button>
+    <button class="btn btn-primary">View course</button>
+    <button class="btn btn-outline">Download syllabus</button>
+    <button class="btn btn-quiet">Skip for now</button>
+    <button class="btn" disabled>Locked</button>
+  </div>
+  <div class="field">
+    <label for="em">Email address</label>
+    <input id="em" type="email" placeholder="you@example.com">
+    <p class="hint">We use this for your login and course updates. Nothing else.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">06</span><h2>Status vocabulary</h2></div>
+  <p class="note">Four states, and only four. Every tranche, class session, assignment and payment is exactly one of them. Students learn the colours once and read them everywhere.</p>
+  <div class="row">
+    <span class="badge b-done">Completed</span>
+    <span class="badge b-active">In progress</span>
+    <span class="badge b-locked">Locked</span>
+    <span class="badge b-overdue">Overdue</span>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">07</span><h2>Signature: the stepped rail</h2></div>
+  <p class="note">The one motif this system is remembered by. Diamond knots on a vertical rail, filling as you advance. In the LMS it's tranche progress. On a project page it's the build timeline. Same component, and in both places the order genuinely carries meaning — which is the only reason to number anything.</p>
+  <div class="grid">
+    <div class="card">
+      <p class="eyebrow" style="color:var(--text-muted);margin-bottom:var(--space-4)">LMS · Mobile App Development</p>
+      <ul class="rail">
+        <li class="done"><span class="knot"><i>✓</i></span><span class="t">Dart &amp; Flutter foundations</span><span class="s">4 class sessions · done</span></li>
+        <li class="done"><span class="knot"><i>✓</i></span><span class="t">Layouts and navigation</span><span class="s">6 class sessions · done</span></li>
+        <li class="active"><span class="knot"><i>03</i></span><span class="t">State management</span><span class="s">3 of 5 class sessions</span></li>
+        <li><span class="knot"><i>04</i></span><span class="t">APIs and local storage</span><span class="s">locked</span></li>
+        <li><span class="knot"><i>05</i></span><span class="t">Capstone: ship to Play Store</span><span class="s">locked</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow" style="color:var(--text-muted);margin-bottom:var(--space-4)">Portfolio · Project timeline</p>
+      <ul class="rail">
+        <li class="done"><span class="knot"><i>✓</i></span><span class="t">Discovery &amp; scope</span><span class="s">week 1</span></li>
+        <li class="done"><span class="knot"><i>✓</i></span><span class="t">Design system &amp; prototype</span><span class="s">week 2–3</span></li>
+        <li class="active"><span class="knot"><i>03</i></span><span class="t">Build</span><span class="s">week 4–7 · current</span></li>
+        <li><span class="knot"><i>04</i></span><span class="t">Testing &amp; handover</span><span class="s">week 8</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow" style="color:var(--text-muted);margin-bottom:var(--space-4)">Payments · Instalment schedule</p>
+      <ul class="rail">
+        <li class="done"><span class="knot"><i>✓</i></span><span class="t">First instalment</span><span class="s">₦150,000 · paid 3 Mar</span></li>
+        <li class="active"><span class="knot"><i>02</i></span><span class="t">Second instalment</span><span class="s">₦100,000 · due 24 Mar</span></li>
+      </ul>
+      <p class="hint" style="margin-top:var(--space-4)">Same rail, different data. The payment schedule is not a separate horizontal stepper — one motif, used wherever order carries meaning. The component is <code>PaymentRail</code>; its parts are the rail and its knots. "Stepper", "step", "node" and "connector" are retired from this project.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="num">08</span><h2>Cards</h2></div>
+  <p class="note">One card component, two contents. Course cards lead with state; project cards lead with the stack. Both lift on hover and both keep the mono footer for facts.</p>
+  <div class="grid">
+    <article class="card">
+      <span class="badge b-active" style="margin-bottom:var(--space-3)">In progress</span>
+      <h3>Mobile App Development</h3>
+      <p>Build and publish a real Flutter app. Live sessions, screen-shared, recorded.</p>
+      <div class="tags"><span class="tag">Flutter</span><span class="tag">Dart</span><span class="tag">Firebase</span></div>
+      <div class="cardfoot"><span>8 weeks · 24 sessions</span><span>₦250,000</span></div>
+    </article>
+    <article class="card">
+      <span class="badge b-locked" style="margin-bottom:var(--space-3)">Enrolment closed</span>
+      <h3>Web Development</h3>
+      <p>From semantic HTML to a deployed full-stack application you own end to end.</p>
+      <div class="tags"><span class="tag">React</span><span class="tag">Node</span><span class="tag">Postgres</span></div>
+      <div class="cardfoot"><span>12 weeks · 36 sessions</span><span>Interest list</span></div>
+    </article>
+    <article class="card">
+      <p class="eyebrow" style="color:var(--text-muted);margin-bottom:var(--space-3)">Client work · 2026</p>
+      <h3>NewsSpend</h3>
+      <p>Cost-tracking mobile app with offline sync and a reporting dashboard.</p>
+      <div class="tags"><span class="tag">Flutter</span><span class="tag">SQLite</span></div>
+      <div class="cardfoot"><span>Shipped · Play Store</span><span>Case study →</span></div>
+    </article>
+  </div>
+</section>
+
+<section style="border-bottom:none">
+  <div class="sechead"><span class="num">09</span><h2>Non-negotiables</h2></div>
+  <p class="note">Rules that keep the system from drifting once other people start building in it.</p>
+  <ul style="color:var(--text-secondary);font-size:var(--size-sm);max-width:64ch;line-height:1.8;padding-left:var(--space-5)">
+    <li>Components never reference a primitive. Semantic tokens only.</li>
+    <li>"Primitive" means a raw token value. The shared component layer is <code>elements</code>, in <code>components/elements/</code>; everything above it is organised by feature.</li>
+    <li>A class session's visual state comes from entitlement and schedule, never watch progress. A paid future class session that is not next up carries no badge — the absence of a state, not a fifth one.</li>
+    <li>One ochre element per screen region.</li>
+    <li>Mono is for code and numbers. Not for emphasis.</li>
+    <li>No fifth status. If something doesn't fit the four, redesign the flow.</li>
+    <li>The visual state <code>active</code> is not the enrollment status. In the database an enrolled learner is <code>enrolled</code>, never <code>active</code>.</li>
+    <li>The stepped rail is the only motif. Don't add a second.</li>
+    <li>Every interactive element has a visible focus ring and a 44px minimum touch target.</li>
+    <li>Body copy stays within 68 characters per line.</li>
+  </ul>
+</section>
+
+<footer>Green &amp; Ochre · tokens.css and tokens.json ship alongside this page.</footer>
+</div>
+
+<script>
+const tt=document.getElementById('tt'),r=document.documentElement;
+tt.addEventListener('click',()=>{
+  const d=r.getAttribute('data-theme')==='dark';
+  r.setAttribute('data-theme',d?'light':'dark');
+  tt.textContent=d?'Dark':'Light';
+});
+</script>
+</body>
+</html>
