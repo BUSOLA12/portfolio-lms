@@ -1,0 +1,15 @@
+{
+  "name": "@platform/schemas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Zod schemas shared by the API route boundary and the web forms. One definition, two consumers.",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {}
+}

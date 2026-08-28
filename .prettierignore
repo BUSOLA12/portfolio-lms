@@ -1,0 +1,14 @@
+node_modules/
+.next/
+dist/
+build/
+coverage/
+apps/api/prisma/generated/
+package-lock.json
+
+# tokens.css is the design system's single source of truth and is copied in
+# verbatim. Reformatting it would create a diff against the original.
+apps/web/styles/tokens.css
+
+# CLAUDE.md is the authoritative specification. Tooling does not rewrite it.
+CLAUDE.md

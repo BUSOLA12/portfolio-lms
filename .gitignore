@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment — .env.example files are committed, real .env files never are
+.env
+.env.*
+!.env.example
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build output
+dist/
+build/
+
+# Prisma generated client
+apps/api/prisma/generated/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test and coverage
+coverage/
+
+# Editor and OS
+.DS_Store
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,13 @@
+{
+  "name": "@platform/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Next.js application serving the (marketing), (app) and (admin) route groups.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {}
+}

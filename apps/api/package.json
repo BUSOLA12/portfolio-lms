@@ -1,0 +1,14 @@
+{
+  "name": "@platform/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone Express API. Owns the database, the cron scheduler, and payment webhooks.",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {}
+}
