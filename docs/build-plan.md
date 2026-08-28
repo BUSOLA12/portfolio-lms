@@ -170,12 +170,14 @@ rather than assumed; say if you want it folded into stage 1 instead.
 - **Depends on:** nothing.
 - **Decided during the step:** scope is `@platform/`; `CLAUDE.md` and `tokens.css` are in `.prettierignore` so tooling never rewrites the authoritative documents; no `dev` scripts until 0.2 and 0.4 give them something to run. The API `.env.example` carries commented blanks for the email provider, payment gateway and cookie domain, each naming the step that resolves it.
 
-### 0.2 Express API skeleton
+### 0.2 Express API skeleton — **DONE**
 - **Builds:** Express app with the routes → controllers → services → repositories directory structure, JSON body parsing, request logging, error-handling middleware, `/health` endpoint, graceful shutdown.
-- **Files:** `apps/api/src/app.js`, `apps/api/src/server.js`, `apps/api/src/routes/index.js`, `apps/api/src/middleware/error.js`, `apps/api/src/middleware/logger.js`. Changes `apps/api/package.json` (dependencies and the first `dev` and `start` scripts) and the root `README.md` command table.
+- **Files:** `apps/api/src/app.js`, `apps/api/src/server.js`, `apps/api/src/routes/index.js`, `apps/api/src/middleware/error.js`, `apps/api/src/middleware/logger.js`. Changed `apps/api/package.json` (added `express` dependency, first `dev` and `start` scripts), `package-lock.json`, and the root `README.md` command table.
 - **Tables:** none.
 - **Done when:** `GET /health` returns 200 locally, and a thrown error in a controller produces a structured JSON error rather than a stack trace.
 - **Depends on:** 0.1.
+- **Verified:** `GET /health` returns `200 {"status":"ok"}` over HTTP; an unknown route returns a structured `404` JSON body; a thrown handler error (sync and async, tested with temporary routes then reverted) returns `500 {"error":{"status":500,"message":"Internal Server Error"}}` with the stack trace going to server logs only; `SIGTERM` triggers graceful shutdown. `npm run lint` passes clean. `npm run format:check` reports only 6 pre-existing `docs/*` files (introduced by the earlier `docs: v1.2 specifications` commit, confirmed by stashing this step's changes); the `README.md` edit passes.
+- **Decided during the step:** Express 5 (`^5.1.0`), so async handler rejections reach the error middleware without a wrapper. Request logging is a dependency-free custom middleware, not `morgan`. Env loading uses `node --env-file-if-exists=.env` rather than a `dotenv` dependency, so the API runs with no `.env` present. A `notFoundHandler` was added to `middleware/error.js` — same concern as the error handler: an API path that would otherwise return Express's default HTML. `controllers/`, `services/` and `repositories/` directories are not created yet; they arrive with their first real file in later steps.
 
 ### 0.3 Prisma initialisation and database conventions
 - **Builds:** Prisma installed, datasource configured, an empty initial migration, plus the project-wide conventions encoded once — UUID v7 default for public ids, `timestamptz` for every timestamp, kobo integers.

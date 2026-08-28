@@ -1,0 +1,36 @@
+// Prisma schema for the Portfolio + LMS API.
+//
+// Project-wide storage conventions are encoded here once and followed by every
+// model added from step 1.1 onward:
+//
+//   - Public ids are UUID v7, never sequential integers (CLAUDE.md rule 10):
+//       id String @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+//     The uuid_generate_v7() function is created in the initial migration,
+//     because Postgres has no built-in v7 generator before version 18.
+//
+//   - Every timestamp is timestamptz (CLAUDE.md rule 10): @db.Timestamptz(6).
+//     Naive timestamps break the West Africa Time cron comparisons.
+//
+//   - Money is integer kobo (CLAUDE.md rule 4): plain Int columns named
+//     *_kobo. Never Decimal, never Float.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Scratch model — step 0.3 only. It exists to prove the UUID v7 default and a
+/// timestamptz column work end to end against a real Postgres. Step 1.1
+/// removes it when the real identity tables arrive.
+model ScratchProbe {
+  id        String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  note      String?
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+
+  @@map("scratch_probe")
+}

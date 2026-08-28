@@ -58,15 +58,17 @@ noted in the template alongside the step that resolves it.
 
 ## Commands
 
-| Command                | Effect                        |
-| ---------------------- | ----------------------------- |
-| `npm run lint`         | ESLint across every workspace |
-| `npm run lint:fix`     | ESLint with autofix           |
-| `npm run format`       | Prettier write                |
-| `npm run format:check` | Prettier check, no writes     |
+| Command                                   | Effect                                               |
+| ----------------------------------------- | ---------------------------------------------------- |
+| `npm run lint`                            | ESLint across every workspace                        |
+| `npm run lint:fix`                        | ESLint with autofix                                  |
+| `npm run format`                          | Prettier write                                       |
+| `npm run format:check`                    | Prettier check, no writes                            |
+| `npm run dev --workspace @platform/api`   | Start the API in watch mode on `PORT` (default 4000) |
+| `npm run start --workspace @platform/api` | Start the API without watch                          |
 
-Development and build commands arrive with the applications themselves, in
-steps 0.2 and 0.4.
+The API loads `apps/api/.env` if present (`--env-file-if-exists`), so it runs
+without one. The web app's development and build commands arrive in step 0.4.
 
 ## Conventions
 
