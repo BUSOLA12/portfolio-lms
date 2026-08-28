@@ -244,3 +244,36 @@ Attendance is marked manually by admin in v1.
 - Watch-progress granularity: completed sessions only, or percentage watched.
 - Whether the API sits on a subdomain (simpler cookies) or a separate domain (CORS).
 - Cohort capacity limit — not yet set.
+
+## Working method
+
+Authority order: this file, then `docs/build-plan.md`, then the two PDFs.
+Where they disagree, the earlier one wins.
+
+**One step at a time.** `docs/build-plan.md` breaks the build order into
+numbered steps. Build only the step you are explicitly named and asked to
+implement. When it is finished, stop and wait. Do not begin the next step.
+Do not build ahead. Do not scaffold "while you're in there".
+
+**Stop rather than expand.** If a step turns out larger than its description,
+stop and say so before writing more. Do not widen scope to make a step work.
+
+**The rules here are decisions, not suggestions.** If one seems wrong, say so
+and wait. Do not work around it, and do not quietly implement something else.
+
+**Report contradictions; never resolve them silently.** These documents were
+written across several sessions. Where they disagree, say which documents
+conflict and what each says, then ask. Where the specification is genuinely
+ambiguous, ask rather than assume.
+
+**Decisions D1 to D12 in `docs/build-plan.md` are settled.** Component naming,
+the `elements` layer, `--state-overdue-rail`, class session visual state, and
+every enum value listed there. Do not re-open or re-argue them.
+
+**Never invent a value listed under "Still open" in `docs/build-plan.md.**
+Prices, capacity, gateway choice, email provider, option lists, and copy are
+not yours to choose. Ask.
+
+**Verify before reporting done.** Run `npm run lint` and `npm run format:check`
+and state the result. Do not describe a step as complete on the strength of
+having written the files.
