@@ -119,67 +119,126 @@ on is established there.
 Railway, two services plus a managed Postgres, all in one project, deploying on
 push to `main`.
 
-### Why both services look unusual
+### Infrastructure as Code, not config files
+
+The whole project is described in one file:
+
+```txt
+.railway/railway.ts
+```
+
+Config as Code (`railway.json` / `railway.toml`) is **deprecated**. New services
+cannot opt into it, and existing files stop being read on **2026-12-01**. Neither
+of our services uses it, and the two `railway.json` files that briefly existed
+here have been deleted.
+
+That file is the single source of truth for the environment: one project
+definition, one apply, and **omit means delete**. Removing a resource from it and
+applying will remove it from Railway.
+
+| Command                | Effect                                              |
+| ---------------------- | --------------------------------------------------- |
+| `railway config plan`  | Preview the diff. Read-only, never changes Railway. |
+| `railway config apply` | Apply after confirmation. `--yes` skips the prompt. |
+| `railway config pull`  | Re-import live state into the file.                 |
+
+Deleting a service or a variable is a destructive change, and non-interactively
+it additionally requires `--confirm-destructive`, so a stray `--yes` cannot
+remove infrastructure on its own.
+
+**Check which environment you are planning against.** The project has both
+`production` and `development`, and `plan` targets whichever is linked —
+`railway status` names it. Applying against the wrong one creates a second copy
+of both services.
+
+### Toolchain requirement: `nodejs-current`
+
+The Railway CLI evaluates `.railway/railway.ts` as TypeScript. Alpine's default
+`nodejs` package cannot run it — **`nodejs-current` is required**. Do not
+downgrade it; `railway config plan` stops working if you do.
+
+The CLI must also be **5.42.1 or newer**; older versions use a retired engine and
+refuse to run.
+
+### Why both services build from the repository root
 
 This is a workspace root, not a bare application, so Railway cannot infer either
-service. Both keep **Root Directory at the repository root** — not at
-`apps/api` or `apps/web` — and name their workspace explicitly in the build and
-start commands. That is what lets one `npm ci` at the root resolve
-`@platform/schemas` for both. It is the one-time price of the monorepo.
+service. **Neither service sets `rootDirectory`** — both build from the
+repository root, which is what lets one install resolve `@platform/schemas` for
+both. Scoping a service to `apps/api` or `apps/web` would break the shared
+package. This is the one-time price of the monorepo.
 
-Each service's settings live in a tracked file rather than only in the
-dashboard, so the deployment shape can be reviewed in a diff:
+| Service | Build                                     | Start                                     |
+| ------- | ----------------------------------------- | ----------------------------------------- |
+| `api`   | `npm run build --workspace @platform/api` | `npm run start --workspace @platform/api` |
+| `web`   | `npm run build --workspace @platform/web` | `npm run start --workspace @platform/web` |
 
-| Service | Config path             |
-| ------- | ----------------------- |
-| API     | `apps/api/railway.json` |
-| Web     | `apps/web/railway.json` |
+The API's build script is `prisma generate`. It is not optional: the generated
+client is written to `apps/api/prisma/generated/`, which is gitignored, so a
+fresh clone has none and `src/db/client.js` cannot import it. Without it the
+service builds green and then crashes on boot.
 
-In Railway, set each service's **Config-as-code** path to its file. Everything
-below is already in those files — repeated here so the intent is readable
-without opening JSON.
+The API also carries a healthcheck on `/health`, so a deploy that boots but
+cannot serve is caught rather than left running.
 
-| Service | Build command                                                          | Start command                             |
-| ------- | ---------------------------------------------------------------------- | ----------------------------------------- |
-| API     | `npm ci && npx prisma generate --schema apps/api/prisma/schema.prisma` | `npm run start --workspace @platform/api` |
-| Web     | `npm ci && npm run build --workspace @platform/web`                    | `npm run start --workspace @platform/web` |
+### Why `prisma` is a runtime dependency
 
-The API's `prisma generate` is not optional. The generated client is written to
-`apps/api/prisma/generated/`, which is gitignored, so a fresh clone has no
-client and `src/db/client.js` fails to import. Without that step the service
-builds cleanly and then crashes on boot.
+`prisma` sits in `dependencies` in `apps/api/package.json`, not
+`devDependencies`. **Do not move it back.**
 
-The API service also carries a healthcheck on `/health`, so a deploy that boots
-but cannot serve is rolled back rather than left running.
+The API runs `prisma migrate deploy` as a pre-deploy command. Pre-deploy runs
+between build and deploy, in a separate container, from the application image —
+and Railway requires that such a command "has the dependencies it needs to run
+installed in the application image". Railway does not install `devDependencies`
+in production, so from `devDependencies` the `prisma` binary is simply absent and
+the step fails **with empty logs**, which is a miserable thing to debug.
+
+`@prisma/client` is the runtime library; `prisma` is the CLI that runs
+migrations and `generate`. Both are needed at runtime here.
+
+### Migrations run on deploy
+
+The API's pre-deploy command is:
+
+```
+npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+```
+
+If it exits non-zero **the deployment does not proceed and is not retried**, so a
+failed migration stops the release rather than shipping code against an
+unmigrated database. Pre-deploy has no time limit by default; set a Pre-deploy
+Timeout on the service if a migration could hang. Note that pre-deploy runs in a
+separate container with no volume mounted, so it must not touch the filesystem.
 
 ### Environment variables
 
-Set these per service in Railway. Neither app reads a `.env` file in
-production — the API's start script uses `--env-file-if-exists`, which is a
-no-op when the file is absent.
+Variables are declared in `.railway/railway.ts`, not set by hand in the
+dashboard. Neither app reads a `.env` file in production — the API's start script
+uses `--env-file-if-exists`, a no-op when the file is absent.
 
-**API service**
+| Service | Variable                   | Source                                   |
+| ------- | -------------------------- | ---------------------------------------- |
+| `api`   | `DATABASE_URL`             | Typed reference to the Postgres service  |
+| `api`   | `NODE_ENV`                 | `production`                             |
+| `api`   | `WEB_ORIGIN`               | The web service's public domain          |
+| `api`   | `AUTH_SESSION_COOKIE_NAME` | `auth_session`                           |
+| `api`   | `AUTH_SESSION_SECRET`      | `preserve()` — set once in the dashboard |
+| `web`   | `NEXT_PUBLIC_API_URL`      | The api service's public domain          |
+| `web`   | `NEXT_PUBLIC_SITE_URL`     | The web service's public domain          |
 
-| Variable                   | Value                                                                                       |
-| -------------------------- | ------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`             | `${{Postgres.DATABASE_URL}}` — a reference, not a pasted string                             |
-| `NODE_ENV`                 | `production`                                                                                |
-| `PORT`                     | Supplied by Railway. Do not set it.                                                         |
-| `WEB_ORIGIN`               | The web service's public URL                                                                |
-| `AUTH_SESSION_SECRET`      | 32 random bytes: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `AUTH_SESSION_COOKIE_NAME` | `auth_session`                                                                              |
-| `AUTH_COOKIE_DOMAIN`       | Leave blank — see below                                                                     |
+`PORT` is supplied by Railway. Do not set it.
 
-**Web service**
+`DATABASE_URL` is a **typed reference** (`Postgres.env.DATABASE_URL`), not a
+pasted connection string, so a credential rotation follows the reference
+automatically.
 
-| Variable               | Value                        |
-| ---------------------- | ---------------------------- |
-| `NEXT_PUBLIC_API_URL`  | The API service's public URL |
-| `NEXT_PUBLIC_SITE_URL` | The web service's public URL |
+**Secrets are never inlined in the file.** `AUTH_SESSION_SECRET` uses
+`preserve()`, which keeps whatever value Railway already holds. Set it once in
+the dashboard:
 
-Use Railway's `${{Postgres.DATABASE_URL}}` reference rather than pasting the
-connection string, so a database credential rotation does not silently break the
-API.
+```
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
 The email and payment variables in `apps/api/.env.example` stay unset: the
 provider and gateway are still undecided, and each is annotated with the step
@@ -187,16 +246,15 @@ that resolves it.
 
 ### Two things deliberately left open
 
-**Cookie domain.** `AUTH_COOKIE_DOMAIN` is blank because whether the API sits on
-a subdomain of the web app (simpler cookies) or a separate domain (CORS) is
-still undecided — see "Still undecided" in `CLAUDE.md`. Railway's generated
-`*.up.railway.app` URLs put the two services on unrelated subdomains, which
-means cookies will not be shared until custom domains are set. That does not
-block deployment; it blocks step 1.8, and should be settled before then.
+**Cookie domain.** `AUTH_COOKIE_DOMAIN` is unset because whether the API sits on
+a subdomain of the web app (simpler cookies) or a separate domain (CORS) is still
+undecided — see "Still undecided" in `CLAUDE.md`. Railway's generated
+`*.up.railway.app` URLs put the two services on unrelated subdomains, so cookies
+will not be shared until custom domains are set. That does not block deployment;
+it blocks step 1.8.
 
-**Migrations do not run on deploy.** Nothing in the build or start command calls
-`prisma migrate deploy`, so a new migration reaches the database only when run by
-hand. That is correct for now — the initial migration is already applied — but it
-is a trap the first time a migration is added in stage 1. Decide then whether it
-belongs in the build command, a pre-deploy command, or stays a deliberate manual
-step. It is called out here so it is not discovered by an outage.
+**Public domains.** Neither service declares a domain, so the
+`RAILWAY_PUBLIC_DOMAIN` references in `WEB_ORIGIN`, `NEXT_PUBLIC_API_URL` and
+`NEXT_PUBLIC_SITE_URL` resolve only once a domain exists for that service.
+Generate one per service after the first apply, or add `domains` to the file when
+the real hostnames are decided.

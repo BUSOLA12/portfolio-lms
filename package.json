@@ -26,5 +26,8 @@
     "prettier": "^3.0.0",
     "stylelint": "^17.14.1",
     "stylelint-config-standard": "^40.0.0"
+  },
+  "dependencies": {
+    "railway": "^3.11.0"
   }
 }
