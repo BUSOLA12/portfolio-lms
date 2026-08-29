@@ -13,6 +13,9 @@
 //
 //   - Money is integer kobo (CLAUDE.md rule 4): plain Int columns named
 //     *_kobo. Never Decimal, never Float.
+//
+//   - Nothing is ever named `session` unqualified. A login session is an
+//     `auth_session`; a scheduled live class is a `class_session`.
 
 generator client {
   provider = "prisma-client-js"
@@ -24,13 +27,106 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Scratch model — step 0.3 only. It exists to prove the UUID v7 default and a
-/// timestamptz column work end to end against a real Postgres. Step 1.1
-/// removes it when the real identity tables arrive.
-model ScratchProbe {
-  id        String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  note      String?
+// ---------------------------------------------------------------------------
+// Identity — step 1.1, architecture §4.1
+// ---------------------------------------------------------------------------
+
+/// Per D5. `pending` is an unclaimed stub — a guardian account created on
+/// someone's behalf, with no password set. `enabled` can log in. `suspended`
+/// is an admin-disabled account.
+///
+/// Not `active`, deliberately: that word belongs to the design system's visual
+/// state vocabulary. Email verification is not a status — `email_verified_at`
+/// carries it, and folding it in would make one column answer two questions.
+enum UserStatus {
+  pending
+  enabled
+  suspended
+
+  @@map("user_status")
+}
+
+model User {
+  id String @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+
+  email String  @unique
+  phone String?
+
+  fullName String @map("full_name")
+
+  /// Nullable because a pending guardian stub is created before anyone sets a
+  /// password. It is filled in when the invitation is claimed at step 1.7.
+  passwordHash String? @map("password_hash")
+
+  /// Verification is a timestamp, not a status (D5). Null means unverified.
+  emailVerifiedAt DateTime? @db.Timestamptz(6) @map("email_verified_at")
+
+  status UserStatus @default(pending)
+
+  /// Architecture §4.7: no role enum on users. Learner and guardian standing
+  /// are derived from enrollments and guardianships; only admin is stored.
+  isAdmin Boolean @default(false) @map("is_admin")
+
   createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
 
-  @@map("scratch_probe")
+  authSessions      AuthSession[]
+  guardianshipsHeld Guardianship[] @relation("GuardianshipGuardian")
+  guardianshipsOver Guardianship[] @relation("GuardianshipLearner")
+
+  @@map("users")
+}
+
+/// A login session. CLAUDE.md rule 5: database sessions, not JWTs — suspension
+/// must take effect immediately, and a JWT stays valid until it expires.
+///
+/// The raw token never reaches this table. Only its hash is stored; the raw
+/// value lives in an httpOnly, secure, SameSite cookie.
+model AuthSession {
+  id String @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+
+  userId String @db.Uuid @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Unique: a presented token must resolve to at most one auth session.
+  tokenHash String @unique @map("token_hash")
+
+  expiresAt DateTime  @db.Timestamptz(6) @map("expires_at")
+  /// Revocation is a timestamp rather than a delete, so logout and forced
+  /// revocation stay auditable.
+  revokedAt DateTime? @db.Timestamptz(6) @map("revoked_at")
+
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+
+  @@index([userId])
+  @@map("auth_sessions")
+}
+
+/// The many-to-many link between a guardian account and a learner account.
+///
+/// CLAUDE.md rule 6: guardian permissions are relationship-scoped. A guardian
+/// is not an observer globally — they are an observer of one specific learner,
+/// and every guardian read verifies a row here links requester to subject.
+model Guardianship {
+  id String @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+
+  guardianId String @db.Uuid @map("guardian_id")
+  guardian   User   @relation("GuardianshipGuardian", fields: [guardianId], references: [id], onDelete: Cascade)
+
+  learnerId String @db.Uuid @map("learner_id")
+  learner   User   @relation("GuardianshipLearner", fields: [learnerId], references: [id], onDelete: Cascade)
+
+  /// How the guardian relates to the learner. Deliberately a free-text column
+  /// and not an enum: no document in this project specifies the permitted
+  /// values, and inventing an option list is not an engineering call. Narrowing
+  /// it later is an additive migration.
+  relationship String
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+
+  @@unique([guardianId, learnerId])
+  @@index([guardianId])
+  @@index([learnerId])
+  @@map("guardianships")
 }
