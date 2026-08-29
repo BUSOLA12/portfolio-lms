@@ -11,5 +11,7 @@
   "engines": {
     "node": ">=22"
   },
-  "dependencies": {}
+  "dependencies": {
+    "zod": "^4.5.4"
+  }
 }

@@ -2,9 +2,11 @@
 //
 // Feature routers mount here as later steps add them, following the
 // routes -> controllers -> services -> repositories layering. For now it
-// carries only the health check, which needs no controller.
+// carries the health check, which needs no controller, and the auth router.
 
 import express from 'express';
+
+import authRouter from './auth.js';
 
 const router = express.Router();
 
@@ -13,5 +15,7 @@ const router = express.Router();
 router.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+router.use('/auth', authRouter);
 
 export default router;

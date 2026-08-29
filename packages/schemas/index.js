@@ -5,4 +5,4 @@
 //
 // Export one named schema per file, re-exported below.
 
-export {};
+export { registrationSchema, fieldErrors } from './registration.js';
