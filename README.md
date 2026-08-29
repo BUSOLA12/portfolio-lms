@@ -168,10 +168,10 @@ repository root, which is what lets one install resolve `@platform/schemas` for
 both. Scoping a service to `apps/api` or `apps/web` would break the shared
 package. This is the one-time price of the monorepo.
 
-| Service | Build                                     | Start                                     |
-| ------- | ----------------------------------------- | ----------------------------------------- |
-| `api`   | `npm run build --workspace @platform/api` | `npm run start --workspace @platform/api` |
-| `web`   | `npm run build --workspace @platform/web` | `npm run start --workspace @platform/web` |
+| Service | Build                                                    | Start                                     |
+| ------- | -------------------------------------------------------- | ----------------------------------------- |
+| `api`   | `npm install && npm run build --workspace @platform/api` | `npm run start --workspace @platform/api` |
+| `web`   | `npm run build --workspace @platform/web`                | `npm run start --workspace @platform/web` |
 
 The API's build script is `prisma generate`. It is not optional: the generated
 client is written to `apps/api/prisma/generated/`, which is gitignored, so a
