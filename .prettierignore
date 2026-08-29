@@ -13,3 +13,8 @@ apps/web/styles/tokens.css
 # CLAUDE.md is the authoritative specification. Tooling does not rewrite it.
 CLAUDE.md
 .railway/
+docs/design-system.html
+docs/tokens.css
+docs/tokens.json
+docs/product-concept-brief-v1.2.md
+docs/technical-architecture-v1.2.md
