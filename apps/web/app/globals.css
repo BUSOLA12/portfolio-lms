@@ -1,0 +1,46 @@
+/* Global stylesheet. Imported once, by the root layout.
+
+   tokens.css is a verbatim copy of docs/tokens.css and is the single source of
+   truth for every colour, size and font in the application. It is listed in
+   .prettierignore so tooling never rewrites it and creates a diff against the
+   original. Nothing below may redeclare a token — this file only applies them.
+
+   Components reference SEMANTIC colour and shape tokens (--text-primary,
+   --bg-page), never primitives (--green-600, --radius-md). Spacing and type
+   primitives (--space-*, --size-*) are legal: they are already the semantic
+   names for their steps. The stylelint rule in stylelint.config.js enforces
+   that across app/ and components/, per D13. */
+
+@import url('../styles/tokens.css');
+
+html {
+  background: var(--bg-page);
+}
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--size-md);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Body copy stays within 68 characters per line — CLAUDE.md's measure rule.
+   Applied where running text lives, not globally, so layout containers are
+   free to be as wide as they need. */
+.measure {
+  max-width: var(--measure);
+}
+
+/* Every interactive element gets a 44px minimum touch target. Learners are on
+   Android phones; a 32px button is a missed tap. tokens.css already supplies
+   the focus ring. */
+:where(a, button, input, select, textarea, [role='button']) {
+  min-height: 44px;
+}
+
+:where(button, [role='button']) {
+  min-width: 44px;
+}

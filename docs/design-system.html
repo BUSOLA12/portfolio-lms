@@ -13,7 +13,7 @@ unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+2000-206F,U+20A6,U+21
 @font-face{font-family:"Public Sans";src:url("/fonts/public-sans-latin.woff2") format("woff2");
 font-weight:400 700;font-display:swap;
 unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+2000-206F,U+20A6,U+2122;}
-@font-face{font-family:"JetBrains Mono";src:url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+@font-face{font-family:"Source Code Pro";src:url("/fonts/source-code-pro-latin.woff2") format("woff2");
 font-weight:400 600;font-display:swap;
 unicode-range:U+0000-00FF,U+2000-206F,U+20A6;}
 </style>
@@ -30,7 +30,7 @@ unicode-range:U+0000-00FF,U+2000-206F,U+20A6;}
 
 --font-display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
 --font-body:"Public Sans",system-ui,sans-serif;
---font-mono:"JetBrains Mono",ui-monospace,monospace;
+--font-mono:"Source Code Pro",ui-monospace,monospace;
 
 --size-2xs:.694rem;--size-xs:.79rem;--size-sm:.889rem;--size-md:1rem;--size-lg:1.125rem;
 --size-xl:1.424rem;--size-2xl:1.802rem;--size-3xl:2.281rem;--size-4xl:2.887rem;
@@ -277,7 +277,7 @@ footer{padding:var(--space-8) 0 var(--space-10);color:var(--text-muted);font-siz
 
 <section>
   <div class="sechead"><span class="num">03</span><h2>Type</h2></div>
-  <p class="note">Bricolage Grotesque for headings — it has a slightly irregular, cut-by-hand quality that keeps the pages from feeling like a corporate template. Public Sans carries all running text. JetBrains Mono is reserved for things that are literally code or literally a number: class session counts, course codes, durations.</p>
+  <p class="note">Bricolage Grotesque for headings — it has a slightly irregular, cut-by-hand quality that keeps the pages from feeling like a corporate template. Public Sans carries all running text. Source Code Pro is reserved for things that are literally code or literally a number: class session counts, course codes, durations, and every naira amount.</p>
 
   <div class="spec">
     <div class="meta">Display / 5xl<br>Bricolage 800<br>tracking −.022em</div>
@@ -411,7 +411,9 @@ footer{padding:var(--space-8) 0 var(--space-10);color:var(--text-muted);font-siz
   <div class="sechead"><span class="num">09</span><h2>Non-negotiables</h2></div>
   <p class="note">Rules that keep the system from drifting once other people start building in it.</p>
   <ul style="color:var(--text-secondary);font-size:var(--size-sm);max-width:64ch;line-height:1.8;padding-left:var(--space-5)">
-    <li>Components never reference a primitive. Semantic tokens only.</li>
+    <li>Components never reference a colour or shape primitive. Semantic tokens only.</li>
+    <li>Radius and elevation go through the semantic layer: <code>--surface-radius</code>, <code>--surface-radius-sm</code>, <code>--surface-radius-lg</code>, <code>--control-radius</code>, <code>--pill-radius</code>, <code>--elevation-raised</code>, <code>--elevation-floating</code>, <code>--elevation-overlay</code>. Never <code>--radius-*</code> or <code>--shadow-*</code> directly — both change in a rebrand.</li>
+    <li>Spacing and type are the exception: <code>--space-5</code> and <code>--size-lg</code> already name their steps, so components reference them directly. There is no layer above them and there should not be one.</li>
     <li>"Primitive" means a raw token value. The shared component layer is <code>elements</code>, in <code>components/elements/</code>; everything above it is organised by feature.</li>
     <li>A class session's visual state comes from entitlement and schedule, never watch progress. A paid future class session that is not next up carries no badge — the absence of a state, not a fifth one.</li>
     <li>One ochre element per screen region.</li>
