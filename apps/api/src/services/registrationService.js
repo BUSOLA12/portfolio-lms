@@ -10,6 +10,16 @@
 import { prisma } from '../db/client.js';
 import { hashPassword } from './passwordService.js';
 import { linkGuardianToLearner } from './guardianshipService.js';
+import {
+  EMAIL_VERIFICATION,
+  GUARDIAN_INVITATION,
+  invitationTtlDays,
+  issueEmailVerification,
+  verificationTtlDays,
+} from './invitationService.js';
+import { sendEmail } from './emailService.js';
+import { guardianInvitation } from '../emails/templates/guardianInvitation.js';
+import { emailVerification } from '../emails/templates/emailVerification.js';
 
 /// Thrown when the input is well-formed but conflicts with what is already
 /// stored. Carries field-level messages so the caller can answer the form in
@@ -34,6 +44,24 @@ const LEARNER_FIELDS = {
   createdAt: true,
 };
 
+// Deep links into the web app. The pages are step 1.11's; the paths are fixed
+// here because the email has to name one now.
+function claimUrl(token) {
+  return `${requireWebOrigin()}/claim?token=${encodeURIComponent(token)}`;
+}
+
+function verifyUrl(token) {
+  return `${requireWebOrigin()}/verify?token=${encodeURIComponent(token)}`;
+}
+
+function requireWebOrigin() {
+  const origin = process.env.WEB_ORIGIN;
+  if (!origin) {
+    throw new Error('WEB_ORIGIN is not set. Emails cannot deep-link without it.');
+  }
+  return origin.replace(/\/+$/, '');
+}
+
 // Prisma's unique-constraint violation.
 const UNIQUE_VIOLATION = 'P2002';
 
@@ -45,14 +73,16 @@ const UNIQUE_VIOLATION = 'P2002';
  * Email verification is not a status — `email_verified_at` stays null and step
  * 1.6 fills it in.
  */
-export async function registerLearner(input) {
+export async function registerLearner(input, { emailProvider } = {}) {
   const passwordHash = await hashPassword(input.password);
+
+  let outcome;
 
   try {
     // One transaction. A learner whose guardianship row failed to write would
     // be a half registration that nothing downstream could detect — rule 6's
     // permission check would simply find no row and deny access, silently.
-    return await prisma.$transaction(async (tx) => {
+    outcome = await prisma.$transaction(async (tx) => {
       const learner = await tx.user.create({
         data: {
           email: input.email,
@@ -64,8 +94,11 @@ export async function registerLearner(input) {
         select: LEARNER_FIELDS,
       });
 
+      // Every registration verifies its address, self or guardian-linked.
+      const verification = await issueEmailVerification(learner.id, tx);
+
       if (input.relationship !== 'guardian') {
-        return { user: learner, guardian: null, invitationToken: null };
+        return { user: learner, verification, guardian: null, invitation: null };
       }
 
       const { guardian, invitation } = await linkGuardianToLearner(
@@ -74,14 +107,10 @@ export async function registerLearner(input) {
         input.guardian,
       );
 
-      // The raw token leaves here once, for step 1.6 to put in an email. It is
+      // The raw tokens leave the transaction once, to be posted below. They are
       // deliberately not part of the endpoint's response body: whoever fills in
       // the registration form is not necessarily the guardian.
-      return {
-        user: learner,
-        guardian: { id: guardian.id, email: guardian.email, status: guardian.status },
-        invitationToken: invitation === null ? null : invitation.token,
-      };
+      return { user: learner, verification, guardian, invitation };
     });
   } catch (error) {
     if (error.code === UNIQUE_VIOLATION && error.meta?.target?.includes('email')) {
@@ -90,5 +119,67 @@ export async function registerLearner(input) {
       });
     }
     throw error;
+  }
+
+  // Strictly after the commit. Sending inside the transaction would hold a
+  // database lock open for as long as the provider takes, and an email sent
+  // inside a transaction that then rolled back cannot be recalled.
+  await deliverRegistrationEmails(outcome, emailProvider);
+
+  return { user: outcome.user };
+}
+
+/**
+ * Posts the two registration emails.
+ *
+ * Failures are logged, not thrown: the account exists and the response is
+ * already earned, and turning a provider outage into a 500 would send the
+ * learner back to a form that now rejects their address as taken. Because
+ * `email_log` records only sends that succeeded, a missing row is exactly the
+ * signal a resend would look for.
+ */
+async function deliverRegistrationEmails(outcome, provider) {
+  const { user, verification, guardian, invitation } = outcome;
+
+  await post(() =>
+    sendEmail({
+      user,
+      type: EMAIL_VERIFICATION,
+      template: emailVerification({
+        learnerName: user.fullName,
+        verifyUrl: verifyUrl(verification.token),
+        expiresInDays: verificationTtlDays(),
+      }),
+      provider,
+    }),
+  );
+
+  // No invitation means the named guardian already had an account, so there is
+  // nothing to claim — see step 1.4.
+  if (invitation === null) return;
+
+  await post(() =>
+    sendEmail({
+      user: guardian,
+      type: GUARDIAN_INVITATION,
+      // Scoped to the learner, not left null: one guardian may be invited for
+      // two children, and a null entity would let the guard suppress the
+      // second invitation as a duplicate of the first.
+      entityRef: user.id,
+      template: guardianInvitation({
+        learnerName: user.fullName,
+        claimUrl: claimUrl(invitation.token),
+        expiresInDays: invitationTtlDays(),
+      }),
+      provider,
+    }),
+  );
+}
+
+async function post(send) {
+  try {
+    await send();
+  } catch (error) {
+    console.error('Registration email failed to send', error);
   }
 }

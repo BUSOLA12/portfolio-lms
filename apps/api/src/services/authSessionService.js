@@ -185,7 +185,11 @@ export function revokeAuthSession(authSessionId) {
   return revokeAuthSessionById(authSessionId);
 }
 
-/** Suspension and "log out everywhere". Returns how many were live. */
-export function revokeAllAuthSessionsForUser(userId) {
-  return revokeAuthSessionsForUser(userId);
+/**
+ * Suspension, "log out everywhere", and the password reset at 1.8. Returns how
+ * many were live. Takes an optional transaction client so a reset can revoke
+ * inside the same commit that changes the password.
+ */
+export function revokeAllAuthSessionsForUser(userId, client = undefined) {
+  return revokeAuthSessionsForUser(userId, new Date(), client);
 }

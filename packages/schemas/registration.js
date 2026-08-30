@@ -13,13 +13,10 @@
 
 import { z } from 'zod';
 
-// Per D16, the project's password policy: NIST 800-63B shaped. A length floor
-// and no composition rules, because composition requirements push people toward
-// predictable shapes and produce weaker passwords in practice. The ceiling is
-// operational rather than a security limit — an unbounded string should never
-// reach the key derivation.
-const PASSWORD_MIN = 8;
-const PASSWORD_MAX = 128;
+import { password } from './password.js';
+
+// The password field lives in ./password.js — D16, shared with the claim and
+// reset flows so the policy is written once.
 
 const NAME_MAX = 120;
 const RELATIONSHIP_MAX = 60;
@@ -45,11 +42,6 @@ const phone = z
   .trim()
   .min(1, 'Enter a phone number')
   .max(32, 'That phone number is too long');
-
-const password = z
-  .string({ error: 'Enter a password' })
-  .min(PASSWORD_MIN, `Use at least ${PASSWORD_MIN} characters`)
-  .max(PASSWORD_MAX, `Keep the password under ${PASSWORD_MAX} characters`);
 
 // Fields common to both branches. `phone` is optional because `users.phone` is
 // nullable; the learner's own number is not named as a required field anywhere.

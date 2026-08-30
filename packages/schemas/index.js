@@ -6,3 +6,8 @@
 // Export one named schema per file, re-exported below.
 
 export { registrationSchema, fieldErrors } from './registration.js';
+export { claimSchema } from './claim.js';
+export { invitationResendSchema } from './invitation.js';
+export { loginSchema } from './login.js';
+export { passwordResetRequestSchema, passwordResetSchema } from './passwordReset.js';
+export { password, PASSWORD_MIN, PASSWORD_MAX } from './password.js';

@@ -43,8 +43,12 @@ export async function revokeAuthSessionById(id, revokedAt = new Date()) {
  * Every live auth session for one user. This is what suspension and
  * "log out everywhere" reach for.
  */
-export async function revokeAuthSessionsForUser(userId, revokedAt = new Date()) {
-  const { count } = await prisma.authSession.updateMany({
+export async function revokeAuthSessionsForUser(
+  userId,
+  revokedAt = new Date(),
+  client = prisma,
+) {
+  const { count } = await client.authSession.updateMany({
     where: { userId, revokedAt: null },
     data: { revokedAt },
   });

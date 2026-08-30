@@ -57,8 +57,8 @@ before(() => {
 });
 
 beforeEach(() => {
-  // The service reads these at send time. Set here so the suite never depends
-  // on what happens to be in .env, and never reaches a real transport.
+  // Restored per test because one case below deletes it deliberately.
+  // test/setup.js is what guarantees no suite can reach a real transport.
   process.env.EMAIL_FROM = 'Tests <tests@example.invalid>';
 });
 
@@ -254,6 +254,17 @@ describe('sendEmail', () => {
       }),
       /EMAIL_FROM/,
     );
+  });
+});
+
+describe('the test transport lock', () => {
+  it('pins every suite to a transport that cannot deliver', () => {
+    // test/setup.js, loaded via --import. Both locks, not one: the transport is
+    // console, and the key cannot authenticate, so even a suite that selects
+    // resend fails at Resend rather than delivering. Overwritten rather than
+    // deleted, because importing Prisma re-reads .env and would restore it.
+    assert.equal(process.env.EMAIL_PROVIDER, 'console');
+    assert.equal(process.env.EMAIL_API_KEY, 'blocked-by-test-setup');
   });
 });
 

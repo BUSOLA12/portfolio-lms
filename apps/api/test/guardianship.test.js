@@ -235,7 +235,11 @@ describe('a guardian registration', () => {
     const guardian = await prisma.user.findUnique({ where: { email: guardianEmail } });
     assert.equal(guardian.status, 'enabled');
     assert.equal(
-      (await prisma.oneTimeToken.findMany({ where: { userId: guardian.id } })).length,
+      (
+        await prisma.oneTimeToken.findMany({
+          where: { userId: guardian.id, purpose: GUARDIAN_INVITATION },
+        })
+      ).length,
       0,
       'an enabled account gets no claim token',
     );
@@ -352,7 +356,7 @@ describe('the invitation token', () => {
 
   it('refuses a token that was already expired when stored', async () => {
     const guardian = await makeGuardian('stored-expired');
-    const token = 'a-token-that-is-already-past-it';
+    const token = `a-token-that-is-already-past-it-${randomUUID()}`;
 
     await createOneTimeToken({
       userId: guardian.id,

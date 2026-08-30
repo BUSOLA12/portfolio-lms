@@ -12,7 +12,7 @@
     "dev": "node --watch --env-file-if-exists=.env src/server.js",
     "build": "prisma generate",
     "start": "node --env-file-if-exists=.env src/server.js",
-    "test": "node --test --env-file-if-exists=.env 'test/**/*.test.js'"
+    "test": "node --test --env-file-if-exists=.env --import ./test/setup.js 'test/**/*.test.js'"
   },
   "//dependencies": "prisma is a runtime dependency, NOT a devDependency. Do not move it back. Railway does not install devDependencies in production, and the pre-deploy container runs `prisma migrate deploy` from the application image — Railway's own docs require that a pre-deploy command 'has the dependencies it needs to run installed in the application image'. With prisma in devDependencies the pre-deploy step fails with empty logs, because the binary is simply absent. @prisma/client is the runtime library; prisma is the CLI that runs migrations and generate.",
   "dependencies": {
