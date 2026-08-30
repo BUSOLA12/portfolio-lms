@@ -12,6 +12,7 @@ export default defineRailway(() => {
     healthcheck: "/health",
     replicas: { "ams": 1 },
     deploy: { preDeployCommand: ["npx prisma migrate deploy --schema apps/api/prisma/schema.prisma"] },
+    domains: ["api.greenatetech.com"],
     networking: { privateNetworkEndpoint: "portfolio-lms" },
     env: { DATABASE_URL: preserve() },
   });
@@ -20,6 +21,7 @@ export default defineRailway(() => {
     build: "npm run build --workspace @platform/web",
     start: "npm run start --workspace @platform/web",
     replicas: { "ams": 1 },
+    domains: ["greenatetech.com"],
     networking: { privateNetworkEndpoint: "portfolio-lms-8cd7" },
     env: { NEXT_PUBLIC_API_URL: preserve(), NODE_ENV: preserve() },
   });
