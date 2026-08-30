@@ -71,6 +71,7 @@ model User {
 
   authSessions      AuthSession[]
   oneTimeTokens     OneTimeToken[]
+  emailLog          EmailLog[]
   guardianshipsHeld Guardianship[] @relation("GuardianshipGuardian")
   guardianshipsOver Guardianship[] @relation("GuardianshipLearner")
 
@@ -171,4 +172,36 @@ model OneTimeToken {
 
   @@index([userId])
   @@map("one_time_tokens")
+}
+
+/// Architecture section 4.6. Rule 9: every scheduled email checks this table
+/// first. Without a record of what has been sent, a learner receives the same
+/// seven-day expiry warning every day for a week.
+///
+/// `type` is a plain string, not an enum. Every later step adds its own kinds
+/// of mail — invitation, verification, five dunning points, two expiry notices,
+/// class session reminders, the guardian summary — and no document enumerates
+/// them. An enum would mean a migration each time one is added, for a column
+/// nothing joins on.
+model EmailLog {
+  id String @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type String
+
+  /// What the mail was about — an instalment id for a dunning reminder, an
+  /// enrollment id for an expiry notice. Null when the mail is about the
+  /// account itself and nothing else, as email verification is.
+  entityRef String? @map("entity_ref")
+
+  sentAt DateTime @default(now()) @map("sent_at") @db.Timestamptz(6)
+
+  /// Architecture section 4.8, named there as duplicate-send prevention. Not
+  /// unique: `entity_ref` is nullable, and Postgres treats every NULL as
+  /// distinct, so a unique index would silently stop guarding exactly the
+  /// account-level mail that has no entity.
+  @@index([userId, type, entityRef])
+  @@map("email_log")
 }

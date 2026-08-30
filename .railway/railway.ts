@@ -14,7 +14,16 @@ export default defineRailway(() => {
     deploy: { preDeployCommand: ["npx prisma migrate deploy --schema apps/api/prisma/schema.prisma"] },
     domains: ["api.greenatetech.com"],
     networking: { privateNetworkEndpoint: "portfolio-lms" },
-    env: { DATABASE_URL: preserve() },
+    env: {
+      DATABASE_URL: preserve(),
+      AUTH_COOKIE_DOMAIN: preserve(),
+      AUTH_SESSION_SECRET: preserve(),
+      ONE_TIME_TOKEN_SECRET: preserve(),
+      WEB_ORIGIN: preserve(),
+      EMAIL_PROVIDER: preserve(),
+      EMAIL_API_KEY: preserve(),
+      EMAIL_FROM: preserve(),
+    },
   });
   const web = service("web", {
     source: portfolioLms,
