@@ -23,6 +23,7 @@ export default defineRailway(() => {
       EMAIL_PROVIDER: preserve(),
       EMAIL_API_KEY: preserve(),
       EMAIL_FROM: preserve(),
+      TRUST_PROXY: preserve(),
     },
   });
   const web = service("web", {

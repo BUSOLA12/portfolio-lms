@@ -25,3 +25,13 @@ process.env.EMAIL_API_KEY = 'blocked-by-test-setup';
 // depends on what happens to be in .env.
 process.env.EMAIL_FROM = 'Tests <tests@example.invalid>';
 process.env.WEB_ORIGIN = 'https://web.example.invalid';
+
+// Rate limits, raised out of the way. Suites register, log in and request
+// resets dozens of times from one address, which is exactly the shape the
+// limiter exists to refuse. The limiter's own suite lowers these deliberately
+// and resets the counters between cases.
+process.env.RATE_LIMIT_AUTH_MAX = '100000';
+process.env.RATE_LIMIT_LOGIN_MAX = '100000';
+process.env.RATE_LIMIT_CLAIM_MAX = '100000';
+process.env.RATE_LIMIT_REGISTRATION_MAX = '100000';
+process.env.RATE_LIMIT_EMAIL_MAX = '100000';

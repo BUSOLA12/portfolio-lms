@@ -15,6 +15,20 @@ export function createApp() {
 
   app.disable('x-powered-by');
 
+  // Rate limiting keys on the client address, and behind Railway's edge that
+  // address only reaches the app through X-Forwarded-For. Untrusted, every
+  // request would appear to come from the proxy and the first limiter to fire
+  // would lock out every learner at once.
+  //
+  // A hop count rather than `true`: trusting the whole chain lets a caller
+  // prepend any address they like to the header and sidestep the limit
+  // entirely. Unset locally, where there is no proxy in front.
+  const trustProxy = process.env.TRUST_PROXY;
+  if (trustProxy) {
+    const hops = Number(trustProxy);
+    app.set('trust proxy', Number.isFinite(hops) ? hops : trustProxy);
+  }
+
   app.use(express.json());
   app.use(requestLogger);
 

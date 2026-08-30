@@ -1,7 +1,13 @@
 // Auth routes.
 //
 // Registration, the guardian claim, the session pair, and password reset.
-// Rate limiting for this router is step 1.9.
+//
+// Every route here is unauthenticated and most of them either check a
+// credential or send an email, so the whole router carries a generous
+// per-address limit and the sensitive routes carry a tighter targeted one on
+// top. `/logout` and `/me` are deliberately left to the address layer alone:
+// both are cheap, and throttling logout would leave someone unable to end a
+// session they want ended.
 
 import express from 'express';
 
@@ -16,18 +22,27 @@ import {
   resendInvitation,
 } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/requireAuth.js';
+import {
+  authAddressLimiter,
+  claimLimiter,
+  emailDispatchLimiter,
+  loginLimiter,
+  registrationLimiter,
+} from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/claim', claim);
-router.post('/invitation/resend', resendInvitation);
+router.use(authAddressLimiter);
 
-router.post('/login', login);
+router.post('/register', registrationLimiter, register);
+router.post('/claim', claimLimiter, claim);
+router.post('/invitation/resend', emailDispatchLimiter, resendInvitation);
+
+router.post('/login', loginLimiter, login);
 router.post('/logout', logout);
 router.get('/me', requireAuth, me);
 
-router.post('/password-reset', requestReset);
-router.post('/password-reset/complete', completeReset);
+router.post('/password-reset', emailDispatchLimiter, requestReset);
+router.post('/password-reset/complete', claimLimiter, completeReset);
 
 export default router;
