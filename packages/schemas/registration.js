@@ -13,14 +13,16 @@
 
 import { z } from 'zod';
 
-// No document sets a password policy. These are engineering defaults, chosen
-// along NIST 800-63B lines — a length floor, no composition rules, and an
-// upper bound so an unbounded string cannot be handed to the key derivation.
-// Worth confirming before launch.
+// Per D16, the project's password policy: NIST 800-63B shaped. A length floor
+// and no composition rules, because composition requirements push people toward
+// predictable shapes and produce weaker passwords in practice. The ceiling is
+// operational rather than a security limit — an unbounded string should never
+// reach the key derivation.
 const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 128;
 
 const NAME_MAX = 120;
+const RELATIONSHIP_MAX = 60;
 
 const fullName = z
   .string({ error: 'Enter a full name' })
@@ -58,14 +60,32 @@ const learnerFields = {
   password,
 };
 
+/// How this guardian relates to this learner — the value stored in the
+/// `guardianships.relationship` column. Per D15: optional free text, no fixed
+/// option list, because the range is too wide to enumerate before seeing real
+/// data. Blank normalises to undefined rather than to an empty string, so the
+/// service applying the `guardian` default at step 1.4 sees one absent value
+/// and not two.
+///
+/// Note the collision, again: this answers "how are they related", while the
+/// top-level `relationship` answers "who is registering".
+const guardianRelationship = z
+  .string({ error: 'Enter how the guardian is related' })
+  .trim()
+  .max(RELATIONSHIP_MAX, `Keep it under ${RELATIONSHIP_MAX} characters`)
+  .transform((value) => (value === '' ? undefined : value))
+  .optional();
+
 /// Brief section 6.1: "Selecting guardian reveals conditional fields for the
-/// guardian's name, email, and contact details." All three are required — the
+/// guardian's name, email, and contact details." Those three are required — the
 /// name and email because step 1.4 creates a stub account and emails an
-/// invitation to them, the phone because the brief names it.
+/// invitation to them, the phone because the brief names it. The fourth,
+/// `relationship`, is optional per D15.
 const guardianDetails = z.object({
   fullName,
   email,
   phone,
+  relationship: guardianRelationship,
 });
 
 export const registrationSchema = z

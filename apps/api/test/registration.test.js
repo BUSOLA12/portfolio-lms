@@ -122,6 +122,49 @@ describe('POST /auth/register — self', () => {
 });
 
 describe('POST /auth/register — guardian', () => {
+  it('accepts an optional guardian relationship, and treats blank as absent', async () => {
+    // Per D15: free text, no option list, and blank is not an empty string.
+    const stated = await postRegistration({
+      relationship: 'guardian',
+      fullName: 'A Learner',
+      email: freshEmail('guardian-relationship'),
+      password: 'a correct password',
+      guardian: {
+        fullName: 'A Guardian',
+        email: freshEmail('guardian-relationship-adult'),
+        phone: '08000000004',
+        relationship: '  Aunt  ',
+      },
+    });
+    assert.equal(stated.status, 201);
+
+    const blank = await postRegistration({
+      relationship: 'guardian',
+      fullName: 'A Learner',
+      email: freshEmail('guardian-blank-relationship'),
+      password: 'a correct password',
+      guardian: {
+        fullName: 'A Guardian',
+        email: freshEmail('guardian-blank-relationship-adult'),
+        phone: '08000000005',
+        relationship: '   ',
+      },
+    });
+    assert.equal(blank.status, 201);
+  });
+
+  it('does not require the guardian relationship', async () => {
+    const { body } = await postRegistration({
+      relationship: 'guardian',
+      fullName: 'A Learner',
+      email: freshEmail('guardian-relationship-optional'),
+      password: 'a correct password',
+    });
+
+    // The three required fields report; the optional fourth does not.
+    assert.equal('guardian.relationship' in body.error.fields, false);
+  });
+
   it('rejects a guardian registration with no guardian fields, per field', async () => {
     const email = freshEmail('guardian-missing');
 
@@ -180,7 +223,7 @@ describe('POST /auth/register — guardian', () => {
     assert.ok(body.error.fields['guardian.email']);
   });
 
-  it('accepts a complete guardian registration, creating the learner only', async () => {
+  it('accepts a complete guardian registration, creating learner and stub', async () => {
     const email = freshEmail('guardian-valid');
     const guardianEmail = freshEmail('guardian-valid-adult');
 
@@ -199,13 +242,16 @@ describe('POST /auth/register — guardian', () => {
     assert.equal(status, 201);
     assert.equal(body.user.email, email);
 
-    // The stub account, the guardianship row and the invitation token are
-    // step 1.4's work. This step creates one user, and only one.
     assert.equal((await prisma.user.findMany({ where: { email } })).length, 1);
+
+    // Until 1.4 this asserted the stub did *not* exist, guarding the seam
+    // registrationService left open. 1.4 closed it, so the assertion inverts —
+    // the guard fired on the first run of the step that filled the seam in.
+    // The stub itself is covered in depth by guardianship.test.js.
     assert.equal(
       (await prisma.user.findMany({ where: { email: guardianEmail } })).length,
-      0,
-      'no guardian stub yet — that is step 1.4',
+      1,
+      'the guardian stub is created alongside the learner',
     );
   });
 });

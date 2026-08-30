@@ -33,8 +33,11 @@ export async function register(req, res, next) {
   }
 
   try {
-    const learner = await registerLearner(parsed.data);
-    res.status(201).json({ user: learner });
+    // Only the learner is echoed back. The guardian stub and its invitation
+    // token stay server-side — the person filling in this form is not
+    // necessarily the guardian, and the token is step 1.6's to email.
+    const { user } = await registerLearner(parsed.data);
+    res.status(201).json({ user });
   } catch (error) {
     if (error instanceof RegistrationConflictError) {
       respondWithFieldErrors(res, error.status, error.message, error.fields);
