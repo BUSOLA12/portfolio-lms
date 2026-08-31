@@ -70,10 +70,26 @@ export function authCookieName() {
  * clearing. A cleared cookie whose attributes differ from the one that was set
  * is a second cookie, and the original stays in the browser.
  */
+/**
+ * Per D20: a security flag defaults to safe and requires an explicit opt-out.
+ *
+ * The previous form was `NODE_ENV === 'production'`, which is backwards — off
+ * unless something is set. Forgetting that variable produced a session cookie
+ * with no Secure flag on a public HTTPS host, and nothing failed loudly, which
+ * is exactly what happened when NODE_ENV was set on the web service but not the
+ * API. Forgetting a variable must now yield a cookie that is too strict.
+ *
+ * Only the literal string `false` opts out, and only for local http
+ * development. Anything else — unset, empty, misspelt — leaves it secure.
+ */
+function cookieSecure() {
+  return process.env.AUTH_COOKIE_SECURE?.trim().toLowerCase() !== 'false';
+}
+
 export function authCookieOptions(expiresAt) {
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: cookieSecure(),
     sameSite: process.env.AUTH_COOKIE_SAMESITE || DEFAULT_SAME_SITE,
     path: '/',
   };

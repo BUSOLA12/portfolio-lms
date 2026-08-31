@@ -209,6 +209,55 @@ describe('authSessionService', () => {
     assert.equal(await resolveAuthSession(second.token), null);
   });
 
+  it('marks the cookie Secure unless explicitly opted out, per D20', () => {
+    const configured = process.env.AUTH_COOKIE_SECURE;
+
+    try {
+      // The failure that produced D20: NODE_ENV was set on one service and not
+      // the other, and the cookie silently lost its Secure flag on a public
+      // HTTPS host. Forgetting a variable must now fail strict, not loose.
+      delete process.env.AUTH_COOKIE_SECURE;
+      assert.equal(authCookieOptions().secure, true, 'unset stays secure');
+
+      process.env.AUTH_COOKIE_SECURE = '';
+      assert.equal(authCookieOptions().secure, true, 'empty stays secure');
+
+      process.env.AUTH_COOKIE_SECURE = 'FALSE_BUT_NOT_QUITE';
+      assert.equal(authCookieOptions().secure, true, 'a misspelt value stays secure');
+
+      process.env.AUTH_COOKIE_SECURE = 'true';
+      assert.equal(authCookieOptions().secure, true);
+
+      // Only the literal opt-out turns it off, for local http development.
+      process.env.AUTH_COOKIE_SECURE = 'false';
+      assert.equal(authCookieOptions().secure, false);
+
+      process.env.AUTH_COOKIE_SECURE = '  FALSE  ';
+      assert.equal(authCookieOptions().secure, false, 'trimmed and case-insensitive');
+    } finally {
+      if (configured === undefined) delete process.env.AUTH_COOKIE_SECURE;
+      else process.env.AUTH_COOKIE_SECURE = configured;
+    }
+  });
+
+  it('does not read NODE_ENV for the Secure flag', () => {
+    const configuredNode = process.env.NODE_ENV;
+    const configuredSecure = process.env.AUTH_COOKIE_SECURE;
+
+    try {
+      delete process.env.AUTH_COOKIE_SECURE;
+      process.env.NODE_ENV = 'development';
+
+      // The old form returned false here, which is the whole defect.
+      assert.equal(authCookieOptions().secure, true);
+    } finally {
+      if (configuredNode === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = configuredNode;
+      if (configuredSecure === undefined) delete process.env.AUTH_COOKIE_SECURE;
+      else process.env.AUTH_COOKIE_SECURE = configuredSecure;
+    }
+  });
+
   it('clears the cookie with the attributes it was set with', () => {
     const res = fakeResponse();
     clearAuthCookie(res);

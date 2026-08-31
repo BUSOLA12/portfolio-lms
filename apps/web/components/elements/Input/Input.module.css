@@ -1,0 +1,33 @@
+/* Input. --control-radius per D14; the placeholder colour is --text-muted,
+   where the reference used the --slate-400 primitive. */
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+  font-family: var(--font-body);
+  font-size: var(--size-md);
+  line-height: var(--leading-snug);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:disabled {
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Invalid is not one of the four visual states. Those describe progress
+   through a course; this describes a field that has not been filled in
+   correctly, which is a different vocabulary and borrows the overdue colour
+   rather than adding a fifth state to the domain one. */
+.invalid {
+  border-color: var(--state-overdue-rail);
+}

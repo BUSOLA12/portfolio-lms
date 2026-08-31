@@ -1,0 +1,90 @@
+/* Button.
+   Reference: design-system.html "buttons". That file reaches for primitives
+   directly, which is legal there and banned here — --green-950 becomes
+   --action-accent-text, --slate-400 becomes --text-muted, and --radius-sm
+   becomes --control-radius per D14. */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-radius: var(--control-radius);
+  font-family: var(--font-body);
+  font-size: var(--size-sm);
+  font-weight: var(--weight-semi);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.button:disabled {
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.primary {
+  background: var(--action-primary-bg);
+  color: var(--action-primary-text);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--action-primary-bg-hover);
+}
+
+/* One ochre element per screen region — CLAUDE.md. This is the loud one, so a
+   region gets at most one of it. */
+.accent {
+  background: var(--action-accent-bg);
+  color: var(--action-accent-text);
+}
+
+.accent:hover:not(:disabled) {
+  background: var(--action-accent-bg-hover);
+}
+
+/* An inset shadow rather than a border, so the outlined and filled variants
+   are the same box size and do not shift when one replaces the other. */
+.outline {
+  background: transparent;
+  color: var(--action-quiet-text);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.outline:hover:not(:disabled) {
+  background: var(--action-quiet-bg-hover);
+}
+
+.quiet {
+  background: transparent;
+  color: var(--action-quiet-text);
+  padding-inline: var(--space-3);
+}
+
+.quiet:hover:not(:disabled) {
+  background: var(--action-quiet-bg-hover);
+}
+
+.block {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button:active:not(:disabled) {
+    transform: none;
+  }
+}

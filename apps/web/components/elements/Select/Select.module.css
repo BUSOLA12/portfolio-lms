@@ -1,0 +1,26 @@
+/* Select. Matches Input's box exactly, so the two line up when a Field holds
+   one of each. The native control is kept: it gives the platform's own picker,
+   which on an Android phone is the one the learner already knows. */
+
+.select {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+  font-family: var(--font-body);
+  font-size: var(--size-md);
+  line-height: var(--leading-snug);
+}
+
+.select:disabled {
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.invalid {
+  border-color: var(--state-overdue-rail);
+}

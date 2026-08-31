@@ -1,0 +1,35 @@
+/* Toast. Per D14: --surface-radius and --elevation-floating. */
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: var(--measure);
+  padding: var(--space-4);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--surface-radius);
+  box-shadow: var(--elevation-floating);
+}
+
+/* A stripe down the leading edge rather than a tinted background: the message
+   stays on the surface colour and stays readable, and the tone is carried
+   somewhere that does not fight the text. */
+.done {
+  border-inline-start: 3px solid var(--state-done-rail);
+}
+
+.overdue {
+  border-inline-start: 3px solid var(--state-overdue-rail);
+}
+
+.neutral {
+  border-inline-start: 3px solid var(--border-strong);
+}
+
+.message {
+  flex: 1;
+  font-size: var(--size-sm);
+  line-height: var(--leading-normal);
+}

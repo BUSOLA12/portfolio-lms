@@ -1,0 +1,45 @@
+/* Badge — the four states, and no fifth.
+   Per D14 the shape token is --pill-radius. */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--pill-radius);
+  font-family: var(--font-body);
+  font-size: var(--size-2xs);
+  font-weight: var(--weight-semi);
+  line-height: 1;
+  letter-spacing: var(--tracking-normal);
+}
+
+/* The dot carries the state as shape as well as colour, so the four are
+   distinguishable without relying on hue alone. */
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--pill-radius);
+  background: currentcolor;
+}
+
+.done {
+  background: var(--state-done-bg);
+  color: var(--state-done-text);
+}
+
+.active {
+  background: var(--state-active-bg);
+  color: var(--state-active-text);
+}
+
+.locked {
+  background: var(--state-locked-bg);
+  color: var(--state-locked-text);
+}
+
+.overdue {
+  background: var(--state-overdue-bg);
+  color: var(--state-overdue-text);
+}

@@ -19,11 +19,12 @@ import { hashPassword } from '../src/services/passwordService.js';
 const EMAIL_PREFIX = 'step-1-9-ratelimit';
 const PASSWORD = 'a perfectly good password';
 
-// Long enough to hold several attempts, because each login costs a scrypt
-// derivation plus a round trip to a remote database — roughly half a second.
-// A shorter window expires between attempts and the counter never accumulates,
-// which is a flaw in the test rather than in the limiter.
-const WINDOW_MS = 5000;
+// Long enough to hold the whole sequence comfortably. Each login costs a scrypt
+// derivation plus a round trip to a remote database, and that cost varies — so
+// a window merely longer than one request is not enough: if it lapses partway
+// through, a fresh bucket opens and the test measures the wrong one. Both
+// earlier flakes here were that, not a fault in the limiter.
+const WINDOW_MS = 20000;
 
 let server;
 let origin;
@@ -102,8 +103,6 @@ describe('repeated login attempts', () => {
     const user = await makeUser('login-limit');
     const attempt = () => post('/auth/login', { email: user.email, password: 'wrong' });
 
-    const windowStartedAt = Date.now();
-
     // Three are allowed through to the credential check and correctly fail.
     for (let i = 0; i < 3; i += 1) {
       assert.equal((await attempt()).status, 401, `attempt ${i + 1} reached the handler`);
@@ -127,10 +126,12 @@ describe('repeated login attempts', () => {
     assert.equal(correct.status, 429);
     assert.equal(correct.headers.getSetCookie().length, 0);
 
-    // And the limit resets on schedule. Waited out from when the window
-    // actually opened, rather than a fixed pause, so a slow round trip cannot
-    // turn this into a flake.
-    await sleep(Math.max(0, WINDOW_MS - (Date.now() - windowStartedAt)) + 250);
+    // And the limit resets on schedule. The wait comes from the server's own
+    // `Retry-After`, which is the bucket telling us when it expires — exact,
+    // and immune to however long the requests above happened to take.
+    const retryAfter = Number(correct.headers.get('retry-after'));
+    assert.ok(retryAfter >= 1, 'the refusal says when to come back');
+    await sleep(retryAfter * 1000 + 500);
 
     const afterReset = await post('/auth/login', {
       email: user.email,

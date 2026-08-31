@@ -266,6 +266,32 @@ and which were requested.
 address a caller names, as fast as they can ask. Rate limiting is 1.9's work and
 is not built here; 1.9 must cover this route alongside login and registration.
 
+**D20. Security flags default to safe and require an explicit opt-out.**
+
+`secure: process.env.NODE_ENV === 'production'` was backwards. A flag that is
+off unless something is set means forgetting a variable produces an unprotected
+cookie on a public HTTPS host — which is exactly what happened. `NODE_ENV` was
+set on the `web` service but not on `api`, so the deployed API issued session
+cookies with no `Secure` flag, and nothing failed loudly: the cookie worked, it
+simply was not protected. Railway's HTTPS redirect does not help, because the
+browser has already sent the cookie by the time the redirect arrives.
+
+Inverted. The cookie is `Secure` unless `AUTH_COOKIE_SECURE` explicitly opts
+out, and only the literal string `false` does — unset, empty, or misspelt all
+leave it on. Forgetting a variable now yields a cookie that is too strict rather
+than one sent in clear text. The opt-out exists for local http development and
+nothing else.
+
+**This applies to any future security flag, not only this one.** A flag whose
+absence weakens a guarantee is written the wrong way round. `httpOnly` and
+`SameSite` already follow the rule — neither is conditional — and anything added
+later must too.
+
+The Secure flag no longer reads `NODE_ENV`. That variable still governs whether
+`db/client.js` parks the Prisma client on `globalThis`, which is a development
+convenience rather than a security property, and it is set on the `api` service
+separately.
+
 ---
 
 ## Stage 0 — Foundation
@@ -369,6 +395,7 @@ rather than assumed; say if you want it folded into stage 1 instead.
 - **Decided during the step — revocation is a timestamp, written with `updateMany`.** Nothing is deleted, so logout and forced revocation stay auditable. The `revokedAt: null` guard makes revoking twice a no-op and leaves the first timestamp standing. `revokeAllAuthSessionsForUser` was added alongside single revocation, slightly beyond the step's wording, because suspension under rule 5 has no other way to close existing logins. `req.user` is stripped of `passwordHash` before it travels any further into the request.
 - **Decided during the step — `node:test`, no test framework.** Node 22+ ships the runner and the assertion library, so the first tests in the project cost no dependency. `npm test` in `apps/api` runs `node --test --env-file-if-exists=.env 'test/**/*.test.js'`.
 - **Decided during the step — session lifetime defaults to 30 days.** No document specifies one. It is an engineering default, overridable with `AUTH_SESSION_TTL_DAYS`, and worth a second look before launch.
+- **Per D20, corrected after the step — the Secure flag defaults to on.** This step shipped `secure: process.env.NODE_ENV === 'production'`, which is off unless something is set. `NODE_ENV` was set on the `web` service but not on `api`, so the deployed API issued session cookies with no `Secure` flag on a public HTTPS host and nothing failed loudly. It now reads `AUTH_COOKIE_SECURE`, where only the literal `false` opts out and unset, empty or misspelt all stay secure. Two tests pin the direction, including one asserting the flag no longer follows `NODE_ENV` at all.
 - **Not decided, deliberately — `SameSite` and cookie domain.** Whether the API sits on a subdomain of the web app or a separate domain is still open, and it decides both. Neither is chosen here: `AUTH_COOKIE_SAMESITE` defaults to `lax` for same-site local development and `AUTH_COOKIE_DOMAIN` stays empty, each commented with what a separate domain would require — `none`, which browsers honour only over HTTPS, plus matching CORS credentials. `secure` is set from `NODE_ENV === 'production'`.
 - **Open: `npm run format:check` is red on documents nobody should reformat.** The five `docs/*` files are verbatim reference copies; `.prettierignore` already exempts `apps/web/styles/tokens.css` for exactly that reason and simply missed the `docs/` originals. Left untouched as outside this step's scope, but until it is settled the format gate stays red for every later step.
 
