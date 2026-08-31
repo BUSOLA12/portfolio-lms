@@ -292,6 +292,39 @@ The Secure flag no longer reads `NODE_ENV`. That variable still governs whether
 convenience rather than a security property, and it is set on the `api` service
 separately.
 
+**D21. The email-verification token had nothing to redeem it, and the API has
+no CORS. Both are step 1.12.**
+
+Two omissions, found when 1.11 was read against what the API actually exposes.
+
+**Nothing consumes an `email_verification` token.** Step 1.6 issues one on every
+registration and emails a link to `/verify`, and 1.6's done-when — both emails
+sent and recorded — is satisfied by that alone. But no step was ever assigned
+the other end. 1.7 built the guardian claim, 1.8 built login and password reset,
+and the verification purpose from D8 was left minted, emailed, and unredeemable.
+`users.email_verified_at` is therefore reachable only through D18's guardian
+claim: a learner cannot verify at all, and has not been able to since 1.6.
+
+**The API sets no CORS headers.** The web app and the API are different origins
+in both environments — `greenatetech.com` calling `api.greenatetech.com`, and
+`localhost:3000` calling `localhost:4000`. The cookie itself is fine: those are
+the same registrable domain, so `SameSite=lax` permits it. CORS is a separate
+gate, and without an explicit `Access-Control-Allow-Origin` plus
+`Access-Control-Allow-Credentials`, a browser will neither send the session
+cookie nor let script read the response. Every screen in 1.11 would fail at its
+first request. `*` is not an option here — it is invalid with credentials — so
+the allowed origin must be named, which is what `WEB_ORIGIN` is for.
+
+Both are API work and 1.11 is entirely web work, so they become their own step
+rather than doubling 1.11's file list. **1.12 is numbered after 1.11 but built
+before it**, and 1.11's dependencies say so. The numbering is kept rather than
+renumbering the stage, because entries elsewhere already reference 1.11 by
+number.
+
+Recorded as a decision rather than fixed quietly because the gap is worth
+knowing about: a done-when can be honestly met and still leave a flow with no
+other end, when the step that would have closed it does not exist.
+
 ---
 
 ## Stage 0 — Foundation
@@ -574,7 +607,20 @@ rather than assumed; say if you want it folded into stage 1 instead.
 - **Files:** `apps/web/app/(app)/register/page.js`, `login/page.js`, `verify/page.js`, `claim/page.js`, `reset/page.js`, `apps/web/lib/api.js`, `apps/web/lib/queryClient.js`.
 - **Tables:** none directly.
 - **Done when:** you can register on a phone as a learner with a guardian, receive both emails, claim the guardian account, verify the learner, and log in as either.
-- **Depends on:** 1.9, 1.10.
+- **Depends on:** 1.9, 1.10, and **1.12**, which is numbered after this step but built before it. Per D21 the screens here call an email-verification endpoint that did not exist and require CORS that the API did not set.
+
+### 1.12 Email verification and CORS
+
+- **Builds:** the endpoint that redeems an `email_verification` token and stamps `email_verified_at`, and cross-origin access with credentials for the web origin.
+- **Files:** `apps/api/src/services/verificationService.js`, `apps/api/src/middleware/cors.js`, `packages/schemas/verification.js`, wiring in `apps/api/src/routes/auth.js`, `apps/api/src/controllers/authController.js` and `apps/api/src/app.js`.
+- **Tables:** `users`, `one_time_tokens`.
+- **Done when:** a verification link stamps `email_verified_at` once and a replay fails; a browser served from `WEB_ORIGIN` can call the API with credentials and read the response, and an origin that is not `WEB_ORIGIN` cannot.
+- **Depends on:** 1.6 for the token and the email, 1.8 for the pattern the redemption follows.
+- **Per D21:** this step exists because 1.6 emails a verification link that nothing could redeem, and because no step had been assigned CORS. Both were found when 1.11 was read against the API's actual surface.
+- **Per D8:** the third and last purpose on `one_time_tokens`. No migration — the table, its hashing and its consumed marker already serve the guardian invitation and the password reset.
+- **Per D20:** the CORS allowlist is a security boundary, so it defaults closed. An unset `WEB_ORIGIN` refuses every cross-origin request rather than permitting all of them, and `*` is in any case invalid alongside credentials.
+- **Follow the redemption shape 1.7 and 1.8 already set:** resolve, check eligibility, burn and write in one transaction; return one indistinguishable failure for unknown, expired and already-consumed; and do not let a rejected request burn the token.
+- **Note on rate limiting:** 1.9's `claimLimiter` covers token-redemption routes and should cover this one too, keyed on address, since a verification link carries no email address to key on.
 
 ---
 
