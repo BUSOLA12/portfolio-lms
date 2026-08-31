@@ -100,6 +100,41 @@ function Gallery() {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>Naira glyph — U+20A6</h2>
+        <p className={styles['naira-note']}>
+          The same amount in all three families. Every one declares U+20A6 in its
+          unicode-range, so a missing glyph falls back to another font and sits visibly
+          wrong beside its own digits. This is the check 0.4 and 1.10 both left for a real
+          device.
+        </p>
+
+        <div className={styles['naira-row']}>
+          <span className={styles['naira-label']}>Display</span>
+          <span className={styles['naira-display']}>₦150,000</span>
+        </div>
+        <div className={styles['naira-row']}>
+          <span className={styles['naira-label']}>Body</span>
+          <span className={styles['naira-body']}>₦150,000</span>
+        </div>
+        <div className={styles['naira-row']}>
+          <span className={styles['naira-label']}>Mono</span>
+          <span className={styles['naira-mono']}>₦150,000</span>
+        </div>
+
+        {/* How a real screen carries an amount: mono, in a card footer, beside
+            its state. The figure is instalment 1 from CLAUDE.md's business
+            rules, not an invented price. */}
+        <Card>
+          <h3 className={styles['card-title']}>Instalment 1</h3>
+          <p className={styles['card-body']}>Due at enrollment.</p>
+          <Card.Footer>
+            <Badge state="done">Paid</Badge>
+            <span>₦150,000</span>
+          </Card.Footer>
+        </Card>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>Toast</h2>
         <div className={styles.stack}>
           <Toast>A neutral message.</Toast>

@@ -79,3 +79,47 @@
   font-size: var(--size-sm);
   color: var(--text-secondary);
 }
+
+/* Naira check. All three families declare U+20A6 in their unicode-range, so a
+   missing glyph shows as a fallback sitting visibly wrong beside its own
+   digits. Rendering the same amount in each makes that comparison possible on
+   a device — which is the only place it can be made. */
+.naira-note {
+  max-width: var(--measure);
+  margin: 0 0 var(--space-4);
+  font-size: var(--size-sm);
+  color: var(--text-secondary);
+}
+
+.naira-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-3);
+}
+
+.naira-label {
+  min-width: 11ch;
+  font-size: var(--size-2xs);
+  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.naira-display {
+  font-family: var(--font-display);
+  font-size: var(--size-2xl);
+  font-weight: var(--weight-display);
+}
+
+.naira-body {
+  font-family: var(--font-body);
+  font-size: var(--size-2xl);
+}
+
+/* Mono is for code and numbers — CLAUDE.md. An amount is a number, so this is
+   the family a real screen uses for one. */
+.naira-mono {
+  font-family: var(--font-mono);
+  font-size: var(--size-2xl);
+}
