@@ -14,6 +14,7 @@ import {
   passwordResetRequestSchema,
   passwordResetSchema,
   registrationSchema,
+  verificationSchema,
 } from '@platform/schemas';
 
 import {
@@ -22,6 +23,7 @@ import {
 } from '../services/registrationService.js';
 import { claimGuardianInvitation } from '../services/invitationService.js';
 import { resendGuardianInvitation } from '../services/guardianshipService.js';
+import { verifyEmailAddress } from '../services/verificationService.js';
 import {
   authenticate,
   publicUser,
@@ -268,6 +270,40 @@ export async function resendInvitation(req, res, next) {
     res.status(202).json({
       message: 'If that address has an invitation waiting, a new link is on its way',
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Per D21 this is the other end of the link 1.6 has been sending since it was
+ * built. No auth session is issued: verifying an address is not signing in, and
+ * whoever clicks the link is not necessarily at the device that registered.
+ */
+export async function verifyEmail(req, res, next) {
+  const parsed = verificationSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    respondWithFieldErrors(
+      res,
+      422,
+      'Check the highlighted fields',
+      fieldErrors(parsed.error),
+    );
+    return;
+  }
+
+  try {
+    const user = await verifyEmailAddress(parsed.data);
+
+    if (user === null) {
+      respondWithFieldErrors(res, 422, 'This link cannot be used', {
+        token: 'This link has expired or has already been used',
+      });
+      return;
+    }
+
+    res.status(200).json({ user });
   } catch (error) {
     next(error);
   }

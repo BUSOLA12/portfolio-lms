@@ -6,6 +6,7 @@
 
 import express from 'express';
 
+import { cors } from './middleware/cors.js';
 import { requestLogger } from './middleware/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 import router from './routes/index.js';
@@ -28,6 +29,10 @@ export function createApp() {
     const hops = Number(trustProxy);
     app.set('trust proxy', Number.isFinite(hops) ? hops : trustProxy);
   }
+
+  // Before the body parser and the routes: a preflight carries no body and
+  // must be answered without reaching either.
+  app.use(cors);
 
   app.use(express.json());
   app.use(requestLogger);

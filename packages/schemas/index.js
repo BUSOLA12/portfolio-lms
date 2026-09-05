@@ -9,5 +9,6 @@ export { registrationSchema, fieldErrors } from './registration.js';
 export { claimSchema } from './claim.js';
 export { invitationResendSchema } from './invitation.js';
 export { loginSchema } from './login.js';
+export { verificationSchema } from './verification.js';
 export { passwordResetRequestSchema, passwordResetSchema } from './passwordReset.js';
 export { password, PASSWORD_MIN, PASSWORD_MAX } from './password.js';

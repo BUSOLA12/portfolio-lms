@@ -19,6 +19,7 @@ import {
   me,
   register,
   requestReset,
+  verifyEmail,
   resendInvitation,
 } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/requireAuth.js';
@@ -36,6 +37,7 @@ router.use(authAddressLimiter);
 
 router.post('/register', registrationLimiter, register);
 router.post('/claim', claimLimiter, claim);
+router.post('/verify', claimLimiter, verifyEmail);
 router.post('/invitation/resend', emailDispatchLimiter, resendInvitation);
 
 router.post('/login', loginLimiter, login);
